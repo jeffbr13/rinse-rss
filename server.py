@@ -65,8 +65,8 @@ def artist_podcast_feed():
 
 if __name__ == '__main__':
     CONFIGURATION = init_configuration()
-    PODCAST_ITEMS = list.sort(get_podcast_items(CONFIGURATION), key=lambda item: item.pub_date)
-    PODCAST_ITEMS_BY_ARTIST = groupby(podcast_items_by_date, key=lambda item: item.artist.name)
+    PODCAST_ITEMS = sorted(get_podcast_items(CONFIGURATION), key=lambda item: item.pub_date)
+    PODCAST_ITEMS_BY_ARTIST = dict(groupby(PODCAST_ITEMS, key=lambda item: item.artist.name))
 
     logging.info('Starting server...')
     # Bind to PORT if defined, otherwise default to 5000.

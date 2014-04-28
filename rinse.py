@@ -1,10 +1,11 @@
 #!python3
+import logging
 from collections import namedtuple
 from datetime import datetime
 from urllib.parse import urlparse
 
-from lxml.html import fromstring as html
 import requests
+from lxml.html import fromstring as html
 
 
 CONTACT_DETAILS = 'mail@benjeffrey.com (@jeffbr13)'
@@ -50,7 +51,7 @@ def get_artist_description(artist_page_url):
         return ''
     artist_page = html(requests.get(artist_page_url).content)
     base_xpath = '/html/body/div[@id="wrapper"]/div[@id="container"]/div[contains(@class, "rounded")]/div'
-    broadcast_time = artist_page.xpath(base_xpath + '/div/h2/text()')[1]
+    broadcast_time = artist_page.xpath(base_xpath + '/div/h2/text()[1]')
     artist_description = '\n\n'.join(artist_page.xpath(base_xpath + '/div[contains(@class, "entry")]/p//text()'))
     return artist_description
 

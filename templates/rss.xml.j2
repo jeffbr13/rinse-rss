@@ -25,8 +25,8 @@
 
         {% for item in podcast_items %}
         <item>
-           <title>{{ item.title }}</title>
-           <description>{{ item.description }}</description>
+           <title>{{ item.title | escape }}</title>
+           <description>{{ item.description | escape }}</description>
            <pubDate>{{ item.pub_date }}</pubDate>
            <guid>{{ item.enclosure.url }}</guid>
 
