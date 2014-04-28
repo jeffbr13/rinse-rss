@@ -83,7 +83,7 @@ def div_to_podcast_item(element):
     return PodcastItem(title=podcast_item_title,
                        description=podcast_item_description,
                        artist=broadcast_artist,
-                       pub_date=broadcast_datetime.strftime('%Y-%m-%d %H-%M-%S%z'),
+                       pub_date=broadcast_datetime.strftime('%a, %d %b %Y %H:%M:%S +0000'),
                        guid=download_url,
                        link=(broadcast_artist.url if broadcast_artist.url else download_enclosure.url),
                        enclosure=download_enclosure)
