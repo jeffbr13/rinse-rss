@@ -7,11 +7,11 @@
 
 <h1>Ben Jeffrey's unofficial Rinse FM podcast feeds</h1>
 
-<h2>Full podcast feed</h2>
+<h2 id="full-feed">Full Podcast Feed</h2>
 
 <ul><li><a href="/rss.xml">All</a></li></ul>
 
-<h2>By artist</h2>
+<h2 id="artist-feeds">Available Artist Feeds:</h2>
 <ul>
 {% for artist in artists %}
     <li><a href="/{{ artist }}.rss.xml">{{ artist }}</a></li>
