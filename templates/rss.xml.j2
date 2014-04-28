@@ -1,0 +1,42 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+    <channel>
+        <link>{{ feed_configuration.url }}</link>
+
+        <title>{{ feed_configuration.title }}</title>
+        <itunes:subtitle>{{ feed_configuration.subtitle }}</itunes:subtitle>
+
+        <description>{{ feed_configuration.description }}</description>
+        <itunes:summary>{{ feed_configuration.description }}</itunes:summary>
+        <itunes:keywords>{{ feed_configuration.keywords }}</itunes:keywords>
+        <language>{{ feed_configuration.language }}</language>
+
+        <itunes:author>{{ feed_configuration.owner }}</itunes:author>
+        <copyright>{{ feed_configuration.copyright }}</copyright>
+
+        <itunes:owner>
+            <itunes:name>{{ feed_configuration.podcast_owner }}</itunes:name>
+            <itunes:email>{{ feed_configuration.podcast_owner_email }}</itunes:email>
+        </itunes:owner>
+
+        <itunes:image href="{{ feed_configuration.thumbnail_url }}"/>
+        <itunes:category text="{{ feed_configuration.category }}"></itunes:category>
+        <itunes:explicit>no</itunes:explicit>
+
+
+        {% for item in podcast_items %}
+        <item>
+           <title>{{ item.title }}</title>
+           <description>{{ item.description }}</description>
+           <pubDate>{{ item.pub_date }}</pubDate>
+           <guid>{{ item.enclosure.url }}</guid>
+
+           <itunes:summary>{{ item.description }}</itunes:summary>
+           <itunes:author>{{ item.artist.name }}</itunes:author>
+
+           <link>{{ item.link }}</link>
+           <enclosure url="{{ item.enclosure.url }}" length="{{ item.enclosure.content_length }}" type="{{ item.enclosure.content_type }}"/>
+        </item>
+        {% endfor %}
+
+    </channel>
+</rss>

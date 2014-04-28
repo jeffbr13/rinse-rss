@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ben Jeffrey's unofficial Rinse FM podcast feeds</title>
+</head>
+<body>
+
+<h1>Ben Jeffrey's unofficial Rinse FM podcast feeds</h1>
+
+<h2>Full podcast feed</h2>
+
+<ul><li><a href="/rss.xml">All</a></li></ul>
+
+<h2>By artist</h2>
+<ul>
+{% for artist in artists %}
+    <li><a href="/{{ artist }}.rss.xml">{{ artist }}</a></li>
+{% endfor %}
+</ul>
+
+</body>
+</html>
