@@ -30,7 +30,7 @@
            <pubDate>{{ item.pub_date }}</pubDate>
            <guid>{{ item.enclosure.url }}</guid>
 
-           <itunes:summary>{{ item.description }}</itunes:summary>
+           <itunes:summary>{{ item.description | escape}}</itunes:summary>
            <itunes:author>{{ item.artist.name }}</itunes:author>
 
            <link>{{ item.link }}</link>
