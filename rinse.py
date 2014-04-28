@@ -18,7 +18,7 @@ Enclosure = namedtuple('Enclosure', ['content_length',
 
 PodcastItem = namedtuple('PodcastItem', ['title',
                                          'description',
-                                         'artist'
+                                         'artist',
                                          'pub_date',
                                          'guid',
                                          'link',
