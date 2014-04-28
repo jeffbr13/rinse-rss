@@ -29,7 +29,8 @@ Artist = namedtuple('Artist', ['name', 'url', 'description'])
 
 
 def get_broadcast_artist(element):
-    """Find the broadcast artist in the given
+    """
+    @rtype: Artist
     """
     name = [text.strip() for text in element.xpath('.//text()') if text.strip()][0]
     url = element.xpath('./div/h3/a/@href')
@@ -62,24 +63,28 @@ def div_to_podcast_item(element):
     broadcast_time = datetime.strptime(element.xpath('./@data-airtime')[0], '%H')
     broadcast_datetime = datetime.combine(broadcast_date.date(), broadcast_time.time())
 
-    artist = get_broadcast_artist(element)
+    broadcast_artist = get_broadcast_artist(element)
 
     download_url = element.xpath('./div/div[@class="download icon"]/a/@href')[0]
-    download_info = requests.head(download_url).headers
+    download_headers = requests.head(download_url).headers
 
     download_enclosure = Enclosure(url=download_url,
-                                   content_length=download_info.get('content-length'),
-                                   content_type=download_info.get('content-type'))
+                                   content_length=download_headers.get('content-length'),
+                                   content_type=download_headers.get('content-type'))
 
-    default_show_description = lambda broadcast, artist: '{0} show, broadcast on Rinse FM, from {1}.'.format(artist.name, broadcast.strftime('%A %d %B, %Y at %H:%M'))
+    podcast_item_title = '{0} ({1})'.format(broadcast_artist.name, broadcast_datetime.strftime('%I%p, %A %d %B %Y').lstrip('0'))
 
-    return PodcastItem(title='{0} ({1})'.format(artist.name, broadcast_datetime.strftime('%I%p, %A %d %B %Y').lstrip('0')),
-                       description=(artist.description if artist.description
-                                    else default_show_description(broadcast_datetime, artist)),
-                       artist=artist,
-                       pub_date=str(broadcast_datetime),
+    if broadcast_artist.description:
+        podcast_item_description = broadcast_artist.description
+    else:
+        podcast_item_description = 'The {0} show, broadcast on Rinse FM, on {1}.'.format(broadcast_artist.name, broadcast_datetime.strftime('%A %d %B, %Y at %H:%M'))
+
+    return PodcastItem(title=podcast_item_title,
+                       description=podcast_item_description,
+                       artist=broadcast_artist,
+                       pub_date=broadcast_datetime.strftime('%Y-%m-%d %H-%M-%S%z'),
                        guid=download_url,
-                       link=(artist.url if artist.url else download_enclosure.url),
+                       link=(broadcast_artist.url if broadcast_artist.url else download_enclosure.url),
                        enclosure=download_enclosure)
 
 
