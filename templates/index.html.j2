@@ -11,10 +11,10 @@
 
 <ul><li><a href="/rss.xml">RSS</a></li></ul>
 
-<h2 id="artist-feeds">Available Artist Feeds:</h2>
+<h2 id="artist-feeds">Regular Show Feeds:</h2>
 <ul>
 {% for artist in artists %}
-    <li><a href="/{{ artist }}.rss.xml">{{ artist }}</a></li>
+    <li><a href="/feed/{{ artist.url_safe_name }}.rss">{{ artist.name }}</a></li>
 {% endfor %}
 </ul>
 

@@ -2,7 +2,6 @@
 import logging
 from collections import namedtuple
 from datetime import datetime
-from urllib.parse import urlparse
 
 import requests
 from lxml.html import fromstring as html
@@ -26,7 +25,10 @@ PodcastItem = namedtuple('PodcastItem', ['title',
                                          'enclosure'])
 
 
-Artist = namedtuple('Artist', ['name', 'url', 'description'])
+Artist = namedtuple('Artist', ['name',
+                               'url_safe_name',
+                               'description',
+                               'url'])
 
 
 def get_broadcast_artist(element):
@@ -35,15 +37,17 @@ def get_broadcast_artist(element):
     """
     name = [text.strip() for text in element.xpath('.//text()') if text.strip()][0]
     url = element.xpath('./div/h3/a/@href')
-    url = url[0] if url else None
-
-    try:
-        description = get_artist_description(url)
-    except Exception as e:
-        description = None
-        raise e
-    description = get_artist_description(url) if url else None
-    return Artist(name, url, description)
+    if url:
+        url = url[0]
+        logging.debug(url)
+        url_safe_name = url.rsplit('/', 2)[-2]
+        logging.debug(url_safe_name)
+    else:
+        url = None
+        url_safe_name = None
+    description = get_artist_description(url)
+    logging.debug('Artist({0}, {1}, {2}, {3}'.format(name, url_safe_name, description, url))
+    return Artist(name, url_safe_name, description, url)
 
 
 def get_artist_description(artist_page_url):

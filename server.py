@@ -1,16 +1,17 @@
 #!python
 # -*- coding: utf-8 -*-
 """Server for rinse.benjeffrey.com"""
-from datetime import datetime
 import logging
+from datetime import datetime
 from os import environ
+from urllib.parse import quote as url_quote, unquote as url_unquote
 
-from flask import Flask, render_template, request, jsonify, abort
 import requests
+from flask import Flask, render_template, request, jsonify, abort
 from yaml import load
 
 import rinse
-from groupby_all import groupby_all
+from helpers import groupby_all
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -21,7 +22,7 @@ SERVER_URL = 'http://rinse-rss.benjeffrey.com'
 ARTWORK_HREF = '/artwork'
 CONFIGURATION = None
 PODCAST_ITEMS = None
-PODCAST_ITEMS_BY_ARTIST = None
+PODCAST_ITEMS_BY_ARTIST_WITH_URL = None
 LAST_REFRESH = None
 
 
@@ -39,7 +40,8 @@ def get_podcast_items(configuration):
 def index():
     """Serve an index of all podcast feed URLs.
     """
-    return render_template('index.html.j2', artists=PODCAST_ITEMS_BY_ARTIST.keys())
+    artists_with_shows = [item[0].artist for item in PODCAST_ITEMS_BY_ARTIST_WITH_URL.values()]
+    return render_template('index.html.j2', artists=artists_with_shows)
 
 
 @SERVER.route('/rss.xml')
@@ -50,21 +52,21 @@ def main_feed():
                            podcast_items=PODCAST_ITEMS)
 
 
-@SERVER.route('/<artist_name>.rss.xml')
+@SERVER.route('/feed/<artist_name>.rss')
 def artist_podcast_feed(artist_name):
-    if not artist_name in PODCAST_ITEMS_BY_ARTIST:
+    if not artist_name in PODCAST_ITEMS_BY_ARTIST_WITH_URL:
         abort(404)
 
-    configuration=CONFIGURATION.copy()
-    configuration['title'] = (artist_name + ' on ' + configuration['title'])
+    feed_configuration=CONFIGURATION.copy()
+    feed_configuration['title'] = (artist_name + ' on ' + feed_configuration['title'])
 
-    if PODCAST_ITEMS_BY_ARTIST[artist_name][0].artist.url:
-        configuration['url'] = PODCAST_ITEMS_BY_ARTIST[artist_name][0].artist.url
+    if PODCAST_ITEMS_BY_ARTIST_WITH_URL[artist_name][0].artist.url:
+        feed_configuration['url'] = PODCAST_ITEMS_BY_ARTIST_WITH_URL[artist_name][0].artist.url
 
     return render_template('rss.xml.j2',
-                           feed_url=(SERVER_URL + '/' + artist_name + '.rss.xml'),
-                           feed_configuration=configuration,
-                           podcast_items=PODCAST_ITEMS_BY_ARTIST[artist_name])
+                           feed_url=(SERVER_URL + '/feed/' + artist_name + '.rss'),
+                           feed_configuration=feed_configuration,
+                           podcast_items=PODCAST_ITEMS_BY_ARTIST_WITH_URL[artist_name])
 
 
 @SERVER.route(ARTWORK_HREF)
@@ -79,7 +81,9 @@ if __name__ == '__main__':
     CONFIGURATION['thumbnail_url'] = SERVER_URL + ARTWORK_HREF
 
     PODCAST_ITEMS = sorted(get_podcast_items(CONFIGURATION), key=lambda item: item.pub_date)
-    PODCAST_ITEMS_BY_ARTIST = dict(groupby_all(PODCAST_ITEMS, key=lambda item: item.artist.name))
+    PODCAST_ITEMS_BY_ARTIST_WITH_URL = groupby_all([item for item in PODCAST_ITEMS if item.artist.url],
+                                                   key=lambda item: item.artist.url_safe_name)
+
 
     logging.info('Starting server...')
     # Bind to PORT if defined, otherwise default to 5000.
