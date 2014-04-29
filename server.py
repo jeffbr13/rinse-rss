@@ -80,7 +80,6 @@ if __name__ == '__main__':
 
     PODCAST_ITEMS = sorted(get_podcast_items(CONFIGURATION), key=lambda item: item.pub_date)
     PODCAST_ITEMS_BY_ARTIST = dict(groupby_all(PODCAST_ITEMS, key=lambda item: item.artist.name))
-    print(PODCAST_ITEMS_BY_ARTIST)
 
     logging.info('Starting server...')
     # Bind to PORT if defined, otherwise default to 5000.
