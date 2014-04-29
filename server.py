@@ -8,7 +8,7 @@ from urllib.parse import quote as url_quote, unquote as url_unquote
 
 import requests
 from flask import Flask, render_template, request, jsonify, abort
-from yaml import load
+from yaml import load as yaml_load
 
 import rinse
 from helpers import groupby_all
@@ -28,7 +28,7 @@ LAST_REFRESH = None
 
 def init_configuration():
     with open('feed-configuration.yaml') as f:
-        return load(f)
+        return yaml_load(f)
 
 
 def get_podcast_items(configuration):
@@ -76,6 +76,7 @@ def podcast_artwork():
 
 
 if __name__ == '__main__':
+    logging.info('Starting server...')
 
     CONFIGURATION = init_configuration()
     CONFIGURATION['thumbnail_url'] = SERVER_URL + ARTWORK_HREF
@@ -85,7 +86,6 @@ if __name__ == '__main__':
                                                    key=lambda item: item.artist.url_safe_name)
 
 
-    logging.info('Starting server...')
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(environ.get('PORT', 5000))
     logging.debug('Launching Flask app...')
