@@ -6,7 +6,7 @@ from itertools import groupby
 import logging
 from os import environ
 
-from flask import Flask, render_template, request, jsonify, redirect, flash
+from flask import Flask, render_template, request, jsonify, abort
 import requests
 from yaml import load
 
@@ -17,6 +17,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 SERVER = Flask(__name__)
 
+SERVER_URL = 'http://rinse-rss.benjeffrey.com'
+ARTWORK_HREF = '/artwork'
 CONFIGURATION = None
 PODCAST_ITEMS = None
 PODCAST_ITEMS_BY_ARTIST = None
@@ -33,7 +35,6 @@ def get_podcast_items(configuration):
     return rinse.podcast_items(configuration)
 
 
-
 @SERVER.route('/')
 def index():
     """Serve an index of all podcast feed URLs.
@@ -43,7 +44,7 @@ def index():
 
 @SERVER.route('/rss.xml')
 def main_feed():
-    configuration = CONFIGURATION
+    configuration = CONFIGURATION.copy()
     return render_template('rss.xml.j2', feed_configuration=CONFIGURATION, podcast_items=PODCAST_ITEMS)
 
 
@@ -63,8 +64,17 @@ def artist_podcast_feed():
                            podcast_items=PODCAST_ITEMS_BY_ARTIST[artist_name])
 
 
+@SERVER.route(ARTWORK_HREF)
+def podcast_artwork():
+    """Serve the podcast artwork image."""
+    return SERVER.send_static_file('artwork.png')
+
+
 if __name__ == '__main__':
+
     CONFIGURATION = init_configuration()
+    CONFIGURATION['thumbnail_url'] = SERVER_URL + ARTWORK_HREF
+
     PODCAST_ITEMS = sorted(get_podcast_items(CONFIGURATION), key=lambda item: item.pub_date)
     PODCAST_ITEMS_BY_ARTIST = dict(groupby(PODCAST_ITEMS, key=lambda item: item.artist.name))
 
