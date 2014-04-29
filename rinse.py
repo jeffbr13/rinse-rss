@@ -22,7 +22,7 @@ PodcastItem = namedtuple('PodcastItem', ['title',
                                          'artist',
                                          'pub_date',
                                          'guid',
-                                         'link',
+                                         'url',
                                          'enclosure'])
 
 
@@ -85,7 +85,7 @@ def div_to_podcast_item(element):
                        artist=broadcast_artist,
                        pub_date=broadcast_datetime.strftime('%a, %d %b %Y %H:%M:%S +0000'),
                        guid=download_url,
-                       link=(broadcast_artist.url if broadcast_artist.url else download_enclosure.url),
+                       url=(broadcast_artist.url if broadcast_artist.url else download_enclosure.url),
                        enclosure=download_enclosure)
 
 

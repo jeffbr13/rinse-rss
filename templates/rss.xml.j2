@@ -34,7 +34,7 @@
            <itunes:summary>{{ item.description | escape}}</itunes:summary>
            <itunes:author>{{ item.artist.name | escape}}</itunes:author>
 
-           <link>{{ item.link }}</link>
+           <link>{{ item.url }}</link>
            <enclosure url="{{ item.enclosure.url }}" length="{{ item.enclosure.content_length }}" type="{{ item.enclosure.content_type }}"/>
         </item>
         {% endfor %}
