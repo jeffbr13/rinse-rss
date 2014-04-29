@@ -31,7 +31,7 @@
            <guid>{{ item.enclosure.url }}</guid>
 
            <itunes:summary>{{ item.description | escape}}</itunes:summary>
-           <itunes:author>{{ item.artist.name }}</itunes:author>
+           <itunes:author>{{ item.artist.name | escape}}</itunes:author>
 
            <link>{{ item.link }}</link>
            <enclosure url="{{ item.enclosure.url }}" length="{{ item.enclosure.content_length }}" type="{{ item.enclosure.content_type }}"/>
