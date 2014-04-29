@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Server for rinse.benjeffrey.com"""
 from datetime import datetime
-from itertools import groupby
 import logging
 from os import environ
 
@@ -11,6 +10,7 @@ import requests
 from yaml import load
 
 import rinse
+from groupby_all import groupby_all
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -51,7 +51,7 @@ def main_feed():
 
 
 @SERVER.route('/<artist_name>.rss.xml')
-def artist_podcast_feed():
+def artist_podcast_feed(artist_name):
     if not artist_name in PODCAST_ITEMS_BY_ARTIST:
         abort(404)
 
@@ -79,7 +79,8 @@ if __name__ == '__main__':
     CONFIGURATION['thumbnail_url'] = SERVER_URL + ARTWORK_HREF
 
     PODCAST_ITEMS = sorted(get_podcast_items(CONFIGURATION), key=lambda item: item.pub_date)
-    PODCAST_ITEMS_BY_ARTIST = dict(groupby(PODCAST_ITEMS, key=lambda item: item.artist.name))
+    PODCAST_ITEMS_BY_ARTIST = dict(groupby_all(PODCAST_ITEMS, key=lambda item: item.artist.name))
+    print(PODCAST_ITEMS_BY_ARTIST)
 
     logging.info('Starting server...')
     # Bind to PORT if defined, otherwise default to 5000.
