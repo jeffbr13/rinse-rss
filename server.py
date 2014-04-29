@@ -44,11 +44,13 @@ def index():
 
 @SERVER.route('/rss.xml')
 def main_feed():
-    configuration = CONFIGURATION.copy()
-    return render_template('rss.xml.j2', feed_configuration=CONFIGURATION, podcast_items=PODCAST_ITEMS)
+    return render_template('rss.xml.j2',
+                           feed_url=(SERVER_URL + '/rss.xml'),
+                           feed_configuration=CONFIGURATION,
+                           podcast_items=PODCAST_ITEMS)
 
 
-@SERVER.route('/<artist_name>.xml')
+@SERVER.route('/<artist_name>.rss.xml')
 def artist_podcast_feed():
     if not artist_name in PODCAST_ITEMS_BY_ARTIST:
         abort(404)
@@ -60,6 +62,7 @@ def artist_podcast_feed():
         configuration['url'] = PODCAST_ITEMS_BY_ARTIST[artist_name][0].artist.url
 
     return render_template('rss.xml.j2',
+                           feed_url=(SERVER_URL + '/' + artist_name + '.rss.xml'),
                            feed_configuration=configuration,
                            podcast_items=PODCAST_ITEMS_BY_ARTIST[artist_name])
 
