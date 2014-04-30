@@ -1,0 +1,10 @@
+Flask==0.10.1
+Jinja2==2.7.2
+MarkupSafe==0.19
+PyYAML==3.11
+Pygments==1.6
+Werkzeug==0.9.4
+bpython==0.12
+itsdangerous==0.24
+lxml==3.3.4
+requests==2.2.1
