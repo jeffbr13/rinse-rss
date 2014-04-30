@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 """Server for rinse.benjeffrey.com"""
 import logging
+import os.path
 from datetime import datetime
 from os import environ
 from urllib.parse import quote as url_quote, unquote as url_unquote
 
 import requests
-from flask import Flask, render_template, request, jsonify, abort
+from flask import Flask, render_template, request, jsonify, abort, send_from_directory
 from yaml import load as yaml_load
 
 import rinse
@@ -73,8 +74,13 @@ def artist_podcast_feed(artist_name):
 
 @SERVER.route(ARTWORK_HREF)
 def podcast_artwork():
-    """Serve the podcast artwork image."""
-    return SERVER.send_static_file('artwork.png')
+    return send_from_directory(os.path.join(SERVER.root_path, 'static'),
+                               'artwork.png', mimetype='image/png')
+
+@SERVER.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(SERVER.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 if __name__ == '__main__':
