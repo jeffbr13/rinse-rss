@@ -14,7 +14,7 @@ import rinse
 from helpers import groupby_all
 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG) if bool(environ.get('DEBUG', False)) else logging.basicConfig(level=logging.INFO)
 
 SERVER = Flask(__name__)
 
@@ -91,6 +91,6 @@ if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(environ.get('PORT', 5000))
     logging.debug('Launching Flask app...')
-    SERVER.run(host='0.0.0.0', port=port, debug=True)
+    SERVER.run(host='0.0.0.0', port=port, debug=bool(environ.get('DEBUG', False)))
 
 
