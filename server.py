@@ -23,15 +23,18 @@ ARTWORK_HREF = '/artwork'
 CONFIGURATION = None
 PODCAST_ITEMS = None
 PODCAST_ITEMS_BY_ARTIST_WITH_URL = None
+ARTISTS_WITH_URLS = None
 LAST_REFRESH = None
 
 
 def init_configuration():
+    logging.info('Loading configuration...')
     with open('feed-configuration.yaml') as f:
         return yaml_load(f)
 
 
 def get_podcast_items(configuration):
+    logging.info('Getting podcast items...')
     LAST_REFRESH = datetime.now()
     return rinse.podcast_items(configuration)
 
@@ -40,8 +43,7 @@ def get_podcast_items(configuration):
 def index():
     """Serve an index of all podcast feed URLs.
     """
-    artists_with_shows = [item[0].artist for item in PODCAST_ITEMS_BY_ARTIST_WITH_URL.values()]
-    return render_template('index.html.j2', artists=artists_with_shows)
+    return render_template('index.html.j2', artists=ARTISTS_WITH_URLS)
 
 
 @SERVER.route('/rss.xml')
@@ -58,7 +60,7 @@ def artist_podcast_feed(artist_name):
         abort(404)
 
     feed_configuration=CONFIGURATION.copy()
-    feed_configuration['title'] = (artist_name + ' on ' + feed_configuration['title'])
+    feed_configuration['title'] = (PODCAST_ITEMS_BY_ARTIST_WITH_URL[artist_name][0].artist.name + ' on ' + feed_configuration['title'])
 
     if PODCAST_ITEMS_BY_ARTIST_WITH_URL[artist_name][0].artist.url:
         feed_configuration['url'] = PODCAST_ITEMS_BY_ARTIST_WITH_URL[artist_name][0].artist.url
@@ -84,7 +86,7 @@ if __name__ == '__main__':
     PODCAST_ITEMS = sorted(get_podcast_items(CONFIGURATION), key=lambda item: item.pub_date)
     PODCAST_ITEMS_BY_ARTIST_WITH_URL = groupby_all([item for item in PODCAST_ITEMS if item.artist.url],
                                                    key=lambda item: item.artist.url_safe_name)
-
+    ARTISTS_WITH_URLS = [item[0].artist for item in PODCAST_ITEMS_BY_ARTIST_WITH_URL.values()]
 
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(environ.get('PORT', 5000))
