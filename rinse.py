@@ -101,4 +101,5 @@ def podcast_item(element):
 def podcast_items(configuration):
     logging.info("Fetching podcast items from {0}".format(configuration['scrape_url']))
     podcasts_page = html(requests.get(configuration['scrape_url']).content)
+    #TODO: scrape more than the front page
     return [podcast_item(div) for div in podcasts_page.xpath('//div[contains(@class, "podcast-list-item")]')]
