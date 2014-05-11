@@ -82,6 +82,10 @@ def favicon():
     return send_from_directory(os.path.join(SERVER.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+@SERVER.route('/typeplate.css')
+def typeplate():
+  return send_from_directory(os.path.join(SERVER.root_path, 'static'), 'typeplate.css')
+
 
 if __name__ == '__main__':
     logging.info('Starting server...')
@@ -98,5 +102,3 @@ if __name__ == '__main__':
     port = int(environ.get('PORT', 5000))
     logging.debug('Launching Flask app...')
     SERVER.run(host='0.0.0.0', port=port, debug=bool(environ.get('DEBUG', False)))
-
-

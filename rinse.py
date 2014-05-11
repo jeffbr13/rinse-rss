@@ -74,7 +74,7 @@ def podcast_item(element):
 
     broadcast_artist = artist(element)
 
-    download_url = element.xpath('./div/div[@class="download icon"]/a/@href')[0]
+    download_url = element.xpath('./div/div[@class="download icon"]/a/@href')[0].strip()
     download_headers = requests.head(download_url).headers
 
     download_enclosure = Enclosure(url=download_url,
