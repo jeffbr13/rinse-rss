@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>The (unofficial) Rinse FM podcast feed(s)</title>
+    <title>Rinse FM unofficial podcast feed</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
     <link rel="stylesheet" href="/typeplate.css" type="text/css" media="screen" charset="utf-8">
+
+    <style type="text/css" media="screen">
+      body {
+        text-align: center;
+        font-family: monospace;
+      }
+    </style>
 </head>
 <body>
 
-<img src="/artwork" alt="Rinse FM" width=350 />
+<img src="http://rinse.fm/wp-content/themes/rp/images/rinselogo.jpg" alt="Rinse FM" />
 
-<h1>The (unofficial) Rinse FM podcast feed(s)</h1>
+<h1>unofficial podcast feed</h1>
 
 <ul><li><a id="full-feed" href="/rss.xml">RSS</a></li></ul>
 
-<h2 id="artist-feeds">Regular Show Feeds:</h2>
+<h2 id="artist-feeds">regular shows</h2>
 <ul>
 {% for artist in artists %}
     <li><a href="/feed/{{ artist.url_safe_name }}.rss">{{ artist.name }}</a></li>
