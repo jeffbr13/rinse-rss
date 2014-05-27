@@ -23,11 +23,11 @@
 
 <img src="http://rinse.fm/wp-content/themes/rp/images/rinselogo.jpg" alt="Rinse FM" />
 
-<h1>Rinse FM unofficial podcast feed</h1>
+<h1>Rinse FM unofficial podcast feed:</h1>
 
 <ul><li><a id="full-feed" href="/rss.xml">full RSS feed</a></li></ul>
 
-<h2 id="presenter-feeds">regular shows</h2>
+<h2 id="presenter-feeds">Regular Shows:</h2>
 <ul>
 {% for presenter in presenters %}
     <li><a href="/feed/{{ presenter.url_safe_name }}.rss">{{ presenter.name }}</a></li>
