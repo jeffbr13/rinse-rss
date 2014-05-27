@@ -23,10 +23,10 @@
 
 <ul><li><a id="full-feed" href="/rss.xml">RSS</a></li></ul>
 
-<h2 id="artist-feeds">regular shows</h2>
+<h2 id="presenter-feeds">regular shows</h2>
 <ul>
-{% for artist in artists %}
-    <li><a href="/feed/{{ artist.url_safe_name }}.rss">{{ artist.name }}</a></li>
+{% for presenter in presenters %}
+    <li><a href="/feed/{{ presenter.url_safe_name }}.rss">{{ presenter.name }}</a></li>
 {% endfor %}
 </ul>
 

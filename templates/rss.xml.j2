@@ -24,18 +24,18 @@
         <itunes:explicit>no</itunes:explicit>
 
 
-        {% for item in podcast_items %}
+        {% for show in shows %}
         <item>
-           <title>{{ item.title | escape }}</title>
-           <description>{{ item.description | escape }}</description>
-           <pubDate>{{ item.pub_date }}</pubDate>
-           <guid>{{ item.enclosure.url }}</guid>
+           <title>{{ show.title | escape }}</title>
+           <description>{{ show.description | escape }}</description>
+           <pubDate>{{ show.pub_date }}</pubDate>
+           <guid>{{ show.enclosure.url }}</guid>
 
-           <itunes:summary>{{ item.description | escape}}</itunes:summary>
-           <itunes:author>{{ item.artist.name | escape}}</itunes:author>
+           <itunes:summary>{{ show.description | escape}}</itunes:summary>
+           <itunes:author>{{ show.presenter.name | escape}}</itunes:author>
 
-           <link>{{ item.url }}</link>
-           <enclosure url="{{ item.enclosure.url }}" length="{{ item.enclosure.content_length }}" type="{{ item.enclosure.content_type }}"/>
+           <link>{{ show.url }}</link>
+           <enclosure url="{{ show.enclosure.url }}" length="{{ show.enclosure.content_length }}" type="{{ show.enclosure.content_type }}"/>
         </item>
         {% endfor %}
 

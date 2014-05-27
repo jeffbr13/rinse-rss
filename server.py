@@ -22,9 +22,9 @@ SERVER = Flask(__name__)
 SERVER_URL = 'http://rinse-rss.benjeffrey.com'
 ARTWORK_HREF = '/artwork'
 CONFIGURATION = None
-PODCAST_ITEMS = None
-PODCAST_ITEMS_BY_ARTIST_WITH_URL = None
-ARTISTS_WITH_URLS = None
+SHOWS = None
+SHOWS_BY_PRESENTER_WITH_URL = None
+PRESENTERS_WITH_URLS = None
 LAST_REFRESH = None
 
 
@@ -34,17 +34,17 @@ def init_configuration():
         return yaml_load(f)
 
 
-def get_podcast_items(configuration):
+def get_shows(configuration):
     logging.info('Getting podcast items...')
     LAST_REFRESH = datetime.now()
-    return rinse.podcast_items(configuration)
+    return rinse.shows(configuration)
 
 
 @SERVER.route('/')
 def index():
     """Serve an index of all podcast feed URLs.
     """
-    return render_template('index.html.j2', artists=ARTISTS_WITH_URLS)
+    return render_template('index.html.j2', presenters=PRESENTERS_WITH_URLS)
 
 
 @SERVER.route('/rss.xml')
@@ -52,24 +52,24 @@ def main_feed():
     return render_template('rss.xml.j2',
                            feed_url=(SERVER_URL + '/rss.xml'),
                            feed_configuration=CONFIGURATION,
-                           podcast_items=PODCAST_ITEMS)
+                           shows=SHOWS)
 
 
-@SERVER.route('/feed/<artist_name>.rss')
-def artist_podcast_feed(artist_name):
-    if not artist_name in PODCAST_ITEMS_BY_ARTIST_WITH_URL:
+@SERVER.route('/feed/<presenter_name>.rss')
+def presenter_podcast_feed(presenter_name):
+    if not presenter_name in SHOWS_BY_PRESENTER_WITH_URL:
         abort(404)
 
     feed_configuration=CONFIGURATION.copy()
-    feed_configuration['title'] = (PODCAST_ITEMS_BY_ARTIST_WITH_URL[artist_name][0].artist.name + ' on ' + feed_configuration['title'])
+    feed_configuration['title'] = (SHOWS_BY_PRESENTER_WITH_URL[presenter_name][0].presenter.name + ' on ' + feed_configuration['title'])
 
-    if PODCAST_ITEMS_BY_ARTIST_WITH_URL[artist_name][0].artist.url:
-        feed_configuration['url'] = PODCAST_ITEMS_BY_ARTIST_WITH_URL[artist_name][0].artist.url
+    if SHOWS_BY_PRESENTER_WITH_URL[presenter_name][0].presenter.url:
+        feed_configuration['url'] = SHOWS_BY_PRESENTER_WITH_URL[presenter_name][0].presenter.url
 
     return render_template('rss.xml.j2',
-                           feed_url=(SERVER_URL + '/feed/' + artist_name + '.rss'),
+                           feed_url=(SERVER_URL + '/feed/' + presenter_name + '.rss'),
                            feed_configuration=feed_configuration,
-                           podcast_items=PODCAST_ITEMS_BY_ARTIST_WITH_URL[artist_name])
+                           shows=SHOWS_BY_PRESENTER_WITH_URL[presenter_name])
 
 
 @SERVER.route(ARTWORK_HREF)
@@ -77,10 +77,12 @@ def podcast_artwork():
     return send_from_directory(os.path.join(SERVER.root_path, 'static'),
                                'artwork.png', mimetype='image/png')
 
+
 @SERVER.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(SERVER.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
 
 @SERVER.route('/typeplate.css')
 def typeplate():
@@ -93,10 +95,10 @@ if __name__ == '__main__':
     CONFIGURATION = init_configuration()
     CONFIGURATION['thumbnail_url'] = SERVER_URL + ARTWORK_HREF
 
-    PODCAST_ITEMS = sorted(get_podcast_items(CONFIGURATION), key=lambda item: item.pub_date)
-    PODCAST_ITEMS_BY_ARTIST_WITH_URL = groupby_all([item for item in PODCAST_ITEMS if item.artist.url],
-                                                   key=lambda item: item.artist.url_safe_name)
-    ARTISTS_WITH_URLS = [item[0].artist for item in PODCAST_ITEMS_BY_ARTIST_WITH_URL.values()]
+    SHOWS = sorted(get_shows(CONFIGURATION), key=lambda item: item.pub_date)
+    SHOWS_BY_PRESENTER_WITH_URL = groupby_all([item for item in SHOWS if item.presenter.url],
+                                           key=lambda item: item.presenter.url_safe_name)
+    PRESENTERS_WITH_URLS = [item[0].presenter for item in SHOWS_BY_PRESENTER_WITH_URL.values()]
 
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(environ.get('PORT', 5000))

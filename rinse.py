@@ -15,26 +15,26 @@ Enclosure = namedtuple('Enclosure', ['content_length',
                                      'url'])
 
 
-PodcastItem = namedtuple('PodcastItem', ['title',
+PodcastShow = namedtuple('PodcastShow', ['title',
                                          'description',
-                                         'artist',
+                                         'presenter',
                                          'pub_date',
                                          'guid',
                                          'url',
                                          'enclosure'])
 
 
-Artist = namedtuple('Artist', ['name',
-                               'url_safe_name',
-                               'description',
-                               'url'])
+Presenter = namedtuple('Presenter', ['name',
+                                     'url_safe_name',
+                                     'description',
+                                     'url'])
 
 
-def artist(element):
+def presenter(element):
     """
-    @rtype: Artist
+    @rtype: Presenter
     """
-    logging.debug('Initialising broadcast artist information from element')
+    logging.debug('Initialising broadcast presenter information from element')
     url = element.xpath('./div/h3/a/@href')
     if url:
         url = url[0]
@@ -44,51 +44,51 @@ def artist(element):
     else:
         url = None
         url_safe_name = None
-    name, description = artist_details(url)
+    name, description = presenter_details(url)
     if not name:
         name = [text.strip() for text in element.xpath('.//text()') if text.strip()][0]
 
-    logging.debug('Successfully initialised <Artist: {0}>'.format(name))
-    return Artist(name, url_safe_name, description, url)
+    logging.debug('Successfully initialised <Presenter: {0}>'.format(name))
+    return Presenter(name, url_safe_name, description, url)
 
 
-def artist_details(artist_page_url):
+def presenter_details(presenter_page_url):
     """
-    Fetches the Rinse FM artist page, and scrapes their:
+    Fetches the Rinse FM presenter page, and scrapes their:
 
     - name
     - description
 
     @rtype: (string, string)
     """
-    logging.debug('Fetching artist description from "{0}"'.format(artist_page_url))
-    if not artist_page_url:
+    logging.debug('Fetching presenter description from "{0}"'.format(presenter_page_url))
+    if not presenter_page_url:
         return (None, None)
 
-    artist_page = html(requests.get(artist_page_url).content)
+    presenter_page = html(requests.get(presenter_page_url).content)
     base_xpath = '/html/body/div[@id="wrapper"]/div[@id="container"]/div[contains(@class, "rounded")]/div'
 
     try:
-        artist_name = artist_page.xpath(base_xpath + '/div/h2/text()')[0]
-        logging.debug('Successfully extracted artist name ({0}) from {1}'.format(artist_name, artist_page_url))
+        presenter_name = presenter_page.xpath(base_xpath + '/div/h2/text()')[0]
+        logging.debug('Successfully extracted presenter name ({0}) from {1}'.format(presenter_name, presenter_page_url))
     except IndexError:
-        artist_name = None
+        presenter_name = None
 
-    artist_description = '\n\n'.join(artist_page.xpath(base_xpath + '/div[contains(@class, "entry")]/p//text()'))
-    logging.debug('Successfully extracted artist description from {0}'.format(artist_page_url))
-    return (artist_name, artist_description)
+    presenter_description = '\n\n'.join(presenter_page.xpath(base_xpath + '/div[contains(@class, "entry")]/p//text()'))
+    logging.debug('Successfully extracted presenter description from {0}'.format(presenter_page_url))
+    return (presenter_name, presenter_description)
 
 
-def podcast_item(element):
+def show(element):
     """
-    @rtype: PodcastItem
+    @rtype: PodcastShow
     """
-    logging.info('Initialising PodcastItem from element')
+    logging.info('Initialising PodcastShow from element')
     broadcast_date = datetime.strptime(element.xpath('./@data-air_day')[0], '%Y-%m-%d')
     broadcast_time = datetime.strptime(element.xpath('./@data-airtime')[0], '%H')
     broadcast_datetime = datetime.combine(broadcast_date.date(), broadcast_time.time())
 
-    broadcast_artist = artist(element)
+    broadcast_presenter = presenter(element)
 
     download_url = element.xpath('./div/div[@class="download icon"]/a/@href')[0].strip()
     download_headers = requests.head(download_url).headers
@@ -97,25 +97,25 @@ def podcast_item(element):
                                    content_length=download_headers.get('content-length'),
                                    content_type=download_headers.get('content-type'))
 
-    podcast_item_title = '{0} ({1})'.format(broadcast_artist.name, broadcast_datetime.strftime('%I%p, %A %d %B %Y').lstrip('0'))
+    show_title = '{0} ({1})'.format(broadcast_presenter.name, broadcast_datetime.strftime('%I%p, %A %d %B %Y').lstrip('0'))
 
-    if broadcast_artist.description:
-        podcast_item_description = broadcast_artist.description
+    if broadcast_presenter.description:
+        show_description = broadcast_presenter.description
     else:
-        podcast_item_description = 'The {0} show, broadcast on Rinse FM, on {1}.'.format(broadcast_artist.name, broadcast_datetime.strftime('%A %d %B, %Y at %H:%M'))
+        show_description = 'The {0} show, broadcast on Rinse FM, on {1}.'.format(broadcast_presenter.name, broadcast_datetime.strftime('%A %d %B, %Y at %H:%M'))
 
-    logging.info('Successfully got <PodcastItem: {0}> data from element'.format(podcast_item_title))
-    return PodcastItem(title=podcast_item_title,
-                       description=podcast_item_description,
-                       artist=broadcast_artist,
+    logging.info('Successfully got <PodcastShow: {0}> data from element'.format(show_title))
+    return PodcastShow(title=show_title,
+                       description=show_description,
+                       presenter=broadcast_presenter,
                        pub_date=broadcast_datetime.strftime('%a, %d %b %Y %H:%M:%S +0000'),
                        guid=download_url,
-                       url=(broadcast_artist.url if broadcast_artist.url else download_enclosure.url),
+                       url=(broadcast_presenter.url if broadcast_presenter.url else download_enclosure.url),
                        enclosure=download_enclosure)
 
 
-def podcast_items(configuration):
+def shows(configuration):
     logging.info("Fetching podcast items from {0}".format(configuration['scrape_url']))
     podcasts_page = html(requests.get(configuration['scrape_url']).content)
     #TODO: scrape more than the front page
-    return [podcast_item(div) for div in podcasts_page.xpath('//div[contains(@class, "podcast-list-item")]')]
+    return [show(div) for div in podcasts_page.xpath('//div[contains(@class, "podcast-list-item")]')]
