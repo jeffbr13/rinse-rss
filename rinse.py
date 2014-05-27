@@ -10,7 +10,6 @@ from lxml.html import fromstring as html
 CONTACT_DETAILS = 'mail@benjeffrey.com (@jeffbr13)'
 PODCAST_URL = ''
 
-
 Enclosure = namedtuple('Enclosure', ['content_length',
                                      'content_type',
                                      'url'])
@@ -36,7 +35,6 @@ def artist(element):
     @rtype: Artist
     """
     logging.debug('Initialising broadcast artist information from element')
-    name = [text.strip() for text in element.xpath('.//text()') if text.strip()][0]
     url = element.xpath('./div/h3/a/@href')
     if url:
         url = url[0]
@@ -46,21 +44,39 @@ def artist(element):
     else:
         url = None
         url_safe_name = None
-    description = fetch_artist_description(url)
+    name, description = artist_details(url)
+    if not name:
+        name = [text.strip() for text in element.xpath('.//text()') if text.strip()][0]
+
     logging.debug('Successfully initialised <Artist: {0}>'.format(name))
     return Artist(name, url_safe_name, description, url)
 
 
-def fetch_artist_description(artist_page_url):
+def artist_details(artist_page_url):
+    """
+    Fetches the Rinse FM artist page, and scrapes their:
+
+    - name
+    - description
+
+    @rtype: (string, string)
+    """
     logging.debug('Fetching artist description from "{0}"'.format(artist_page_url))
     if not artist_page_url:
-        return ''
+        return (None, None)
+
     artist_page = html(requests.get(artist_page_url).content)
     base_xpath = '/html/body/div[@id="wrapper"]/div[@id="container"]/div[contains(@class, "rounded")]/div'
-    broadcast_time = artist_page.xpath(base_xpath + '/div/h2/text()[1]')
+
+    try:
+        artist_name = artist_page.xpath(base_xpath + '/div/h2/text()')[0]
+        logging.debug('Successfully extracted artist name ({0}) from {1}'.format(artist_name, artist_page_url))
+    except IndexError:
+        artist_name = None
+
     artist_description = '\n\n'.join(artist_page.xpath(base_xpath + '/div[contains(@class, "entry")]/p//text()'))
     logging.debug('Successfully extracted artist description from {0}'.format(artist_page_url))
-    return artist_description
+    return (artist_name, artist_description)
 
 
 def podcast_item(element):
