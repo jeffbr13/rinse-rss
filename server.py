@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.DEBUG) if bool(environ.get('DEBUG', False)) el
 
 SERVER = Flask(__name__)
 
-SERVER_URL = 'http://rinse-rss.benjeffrey.com'
+SERVER_URL = 'http://rinse.benjeffrey.net'
 ARTWORK_HREF = '/artwork'
 CONFIGURATION = None
 SHOWS = None
