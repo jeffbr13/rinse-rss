@@ -47,15 +47,15 @@ def index():
     return render_template('index.html.j2', presenters=PRESENTERS_WITH_URLS)
 
 
-@SERVER.route('/rss.xml')
+@SERVER.route('/rss')
 def main_feed():
     return render_template('rss.xml.j2',
-                           feed_url=(SERVER_URL + '/rss.xml'),
+                           feed_url=(SERVER_URL + '/rss'),
                            feed_configuration=CONFIGURATION,
                            shows=SHOWS)
 
 
-@SERVER.route('/feed/<presenter_name>.rss')
+@SERVER.route('/show/<presenter_name>.rss')
 def presenter_podcast_feed(presenter_name):
     if not presenter_name in SHOWS_BY_PRESENTER_WITH_URL:
         abort(404)
@@ -67,7 +67,7 @@ def presenter_podcast_feed(presenter_name):
         feed_configuration['url'] = SHOWS_BY_PRESENTER_WITH_URL[presenter_name][0].presenter.url
 
     return render_template('rss.xml.j2',
-                           feed_url=(SERVER_URL + '/feed/' + presenter_name + '.rss'),
+                           feed_url=(SERVER_URL + '/show/' + presenter_name + '.rss'),
                            feed_configuration=feed_configuration,
                            shows=SHOWS_BY_PRESENTER_WITH_URL[presenter_name])
 

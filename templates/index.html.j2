@@ -21,12 +21,12 @@
 
   <p>So no worries, I built my own RSS feed!</p>
 
-  <ul><li><a id="full-feed" href="/rss.xml">all Rinse FM podcasts</a></li></ul>
+  <ul><li><a id="rss" href="/rss">all Rinse FM podcasts</a></li></ul>
 
   <h2 id="shows"><a href="#shows">show feeds</a></h2>
   <ul>
   {% for presenter in presenters %}
-      <li><a href="/feed/{{ presenter.url_safe_name }}.rss">{{ presenter.name }}</a></li>
+      <li><a href="/show/{{ presenter.url_safe_name }}.rss">{{ presenter.name }}</a></li>
   {% endfor %}
   </ul>
 </article>
