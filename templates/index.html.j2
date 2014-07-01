@@ -8,34 +8,27 @@
     <link rel="alternate" type="application/rss+xml" href="/rss.xml" />
 
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="/typeplate.css" type="text/css" media="screen">
-
-
-    <style type="text/css" media="screen">
-      body {
-        text-align: center;
-        font-family: monospace;
-      }
-
-      ul>li {
-        list-style-type: none;
-      }
-    </style>
+    <link rel="stylesheet" href="https://benjeffrey.com/stylesheet.css" type="text/css" media="screen">
 </head>
 <body>
 
-<img src="http://rinse.fm/wp-content/themes/rp/images/rinselogo.jpg" alt="Rinse FM" />
+<article class="row">
+  <h1><a href="http://rinse.fm/"><img src="http://rinse.fm/wp-content/themes/rp/images/rinselogo.jpg" alt="Rinse FM" /></a><br/> <a href="">unofficial podcast feed</a></h1>
 
-<h1>Rinse FM unofficial podcast feed:</h1>
+  <p>Rinse FM's website CMS doesn't enclose the podcast media files in it's RSS feeds, making it impossible to subscribe with podcatchers.</p>
 
-<ul><li><a id="full-feed" href="/rss.xml">full RSS feed</a></li></ul>
+  <p>I was using <a href="https://levels.io/rinse-fm-podcast/">@levelsio's Rinse FM podcast</a> with great success for a while. Unfortunately, it seems to break whenever there's a format-change or any erroneous data-entry, making it unreliable. I've <a href="https://twitter.com/jeffbr13/status/447019136934486016">tweeted levelsio in the past to fix issues</a>, but it seems unfair to bug him to keep it maintained, and he's not open-sourced it yet.</p>
 
-<h2 id="presenter-feeds">Regular Shows:</h2>
-<ul>
-{% for presenter in presenters %}
-    <li><a href="/feed/{{ presenter.url_safe_name }}.rss">{{ presenter.name }}</a></li>
-{% endfor %}
-</ul>
+  <p>So no worries, I built my own RSS feed!</p>
 
+  <ul><li><a id="full-feed" href="/rss.xml">all Rinse FM podcasts</a></li></ul>
+
+  <h2 id="shows"><a href="#shows">show feeds</a></h2>
+  <ul>
+  {% for presenter in presenters %}
+      <li><a href="/feed/{{ presenter.url_safe_name }}.rss">{{ presenter.name }}</a></li>
+  {% endfor %}
+  </ul>
+</article>
 </body>
 </html>
