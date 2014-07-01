@@ -98,7 +98,8 @@ if __name__ == '__main__':
     SHOWS = sorted(get_shows(CONFIGURATION), key=lambda item: item.pub_date)
     SHOWS_BY_PRESENTER_WITH_URL = groupby_all([item for item in SHOWS if item.presenter.url],
                                            key=lambda item: item.presenter.url_safe_name)
-    PRESENTERS_WITH_URLS = [item[0].presenter for item in SHOWS_BY_PRESENTER_WITH_URL.values()]
+    PRESENTERS_WITH_URLS = sorted([item[0].presenter for item in SHOWS_BY_PRESENTER_WITH_URL.values()],
+                                  key=lambda x: x.name)
 
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(environ.get('PORT', 5000))
