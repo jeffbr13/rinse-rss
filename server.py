@@ -97,11 +97,6 @@ def favicon():
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
-@SERVER.route('/typeplate.css')
-def typeplate():
-  return send_from_directory(os.path.join(SERVER.root_path, 'static'), 'typeplate.css')
-
-
 if __name__ == '__main__':
     logging.info('Starting server...')
 
