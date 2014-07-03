@@ -40,7 +40,7 @@ def get_shows(configuration):
     return rinse.shows(configuration)
 
 
-def refresh_data(configuration):
+def refresh_data(configuration, shows, shows_by_presenter_with_url, presenters_with_urls):
     if not LAST_REFRESH or LAST_REFRESH < (datetime.now() - timedelta(minutes=15)):
         logging.info('Refreshing data.')
         shows = sorted(get_shows(configuration), key=lambda item: item.pub_date)
@@ -49,6 +49,9 @@ def refresh_data(configuration):
         presenters_with_urls = sorted([item[0].presenter for item in shows_by_presenter_with_url.values()],
                                       key=lambda x: x.name)
         return (shows, shows_by_presenter_with_url, presenters_with_urls)
+    else:
+        return shows, shows_by_presenter_with_url, presenters_with_urls
+
 
 @SERVER.route('/')
 def index():
@@ -105,7 +108,10 @@ if __name__ == '__main__':
     CONFIGURATION = init_configuration()
     CONFIGURATION['thumbnail_url'] = SERVER_URL + ARTWORK_HREF
 
-    SHOWS, SHOWS_BY_PRESENTER_WITH_URL, PRESENTERS_WITH_URLS = refresh_data(CONFIGURATION)
+    SHOWS, SHOWS_BY_PRESENTER_WITH_URL, PRESENTERS_WITH_URLS = refresh_data(CONFIGURATION,
+                                                                            SHOWS,
+                                                                            SHOWS_BY_PRESENTER_WITH_URL,
+                                                                            PRESENTERS_WITH_URLS)
 
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(environ.get('PORT', 5000))
