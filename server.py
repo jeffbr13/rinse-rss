@@ -59,7 +59,7 @@ def index():
     return render_template('index.html', shows=SHOWS_WITH_URLS)
 
 
-@SERVER.route('/rss')
+@SERVER.route('/podcasts')
 def main_feed():
     return render_template('rss.xml',
                            feed_url=(CONFIGURATION['server_url'] + '/rss'),
