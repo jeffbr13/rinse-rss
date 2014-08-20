@@ -74,7 +74,9 @@ def show_podcast_feed(show_name):
 
     feed_configuration = CONFIGURATION.copy()
     feed_configuration['title'] = (PODCASTS_BY_SHOW_WITH_URL[show_name][0].show.name + ' on ' + feed_configuration['title'])
-    # TODO: use show description here
+
+    if PODCASTS_BY_SHOW_WITH_URL[show_name][0].description:
+        feed_configuration['description'] = PODCASTS_BY_SHOW_WITH_URL[show_name][0].description
 
     if PODCASTS_BY_SHOW_WITH_URL[show_name][0].show.url:
         feed_configuration['url'] = PODCASTS_BY_SHOW_WITH_URL[show_name][0].show.url
