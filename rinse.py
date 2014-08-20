@@ -7,7 +7,7 @@ import requests
 from lxml.html import fromstring as html
 
 
-CONTACT_DETAILS = 'mail@benjeffrey.com (@jeffbr13)'
+CONTACT_DETAILS = 'mail@benjeffrey.net (@jeffbr13)'
 PODCAST_URL = ''
 
 Enclosure = namedtuple('Enclosure', ['content_length',
