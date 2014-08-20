@@ -19,73 +19,73 @@ logging.basicConfig(level=logging.DEBUG) if bool(environ.get('DEBUG', False)) el
 
 SERVER = Flask(__name__)
 
-SERVER_URL = 'http://rinse.benjeffrey.net'
-ARTWORK_HREF = '/artwork'
 CONFIGURATION = None
-SHOWS = None
-SHOWS_BY_PRESENTER_WITH_URL = None
-PRESENTERS_WITH_URLS = None
+PODCASTS = None
+PODCASTS_BY_SHOW_WITH_URL = None
+SHOWS_WITH_URLS = None
 LAST_REFRESH = None
 
 
-def init_configuration():
+def load_configuration():
     logging.info('Loading configuration...')
     with open('feed-configuration.yaml') as f:
         return yaml_load(f)
 
 
-def get_shows(configuration):
+def get_podcasts(configuration):
     logging.info('Getting podcast items...')
     LAST_REFRESH = datetime.now()
-    return rinse.shows(configuration)
+    return rinse.podcasts(configuration['scrape_url'])
 
 
-def refresh_data(configuration, shows, shows_by_presenter_with_url, presenters_with_urls):
+def refresh(configuration, podcasts, podcasts_by_show_with_url, shows_with_urls):
     if not LAST_REFRESH or LAST_REFRESH < (datetime.now() - timedelta(minutes=15)):
         logging.info('Refreshing data.')
-        shows = sorted(get_shows(configuration), key=lambda item: item.pub_date)
-        shows_by_presenter_with_url = groupby_all([item for item in shows if item.presenter.url],
-                                               key=lambda item: item.presenter.url_safe_name)
-        presenters_with_urls = sorted([item[0].presenter for item in shows_by_presenter_with_url.values()],
-                                      key=lambda x: x.name)
-        return (shows, shows_by_presenter_with_url, presenters_with_urls)
+        podcasts = sorted(get_podcasts(configuration), key=lambda item: item.pub_date)
+        podcasts_by_show_with_url = groupby_all([item for item in podcasts if item.show.url],
+                                                key=lambda item: item.show.url_safe_name)
+        shows_with_urls = sorted(
+            [item[0].show for item in podcasts_by_show_with_url.values()],
+            key=lambda x: x.name)
+        return (podcasts, podcasts_by_show_with_url, shows_with_urls)
     else:
-        return shows, shows_by_presenter_with_url, presenters_with_urls
+        return podcasts, podcasts_by_show_with_url, shows_with_urls
 
 
 @SERVER.route('/')
 def index():
     """Serve an index of all podcast feed URLs.
     """
-    return render_template('index.html.j2', presenters=PRESENTERS_WITH_URLS)
+    return render_template('index.html', shows=SHOWS_WITH_URLS)
 
 
 @SERVER.route('/rss')
 def main_feed():
-    return render_template('rss.xml.j2',
-                           feed_url=(SERVER_URL + '/rss'),
+    return render_template('rss.xml',
+                           feed_url=(CONFIGURATION['server_url'] + '/rss'),
                            feed_configuration=CONFIGURATION,
-                           shows=SHOWS)
+                           podcasts=PODCASTS)
 
 
-@SERVER.route('/show/<presenter_name>.rss')
-def presenter_podcast_feed(presenter_name):
-    if not presenter_name in SHOWS_BY_PRESENTER_WITH_URL:
+@SERVER.route('/show/<show_name>.rss')
+def show_podcast_feed(show_name):
+    if not show_name in PODCASTS_BY_SHOW_WITH_URL:
         abort(404)
 
-    feed_configuration=CONFIGURATION.copy()
-    feed_configuration['title'] = (SHOWS_BY_PRESENTER_WITH_URL[presenter_name][0].presenter.name + ' on ' + feed_configuration['title'])
+    feed_configuration = CONFIGURATION.copy()
+    feed_configuration['title'] = (PODCASTS_BY_SHOW_WITH_URL[show_name][0].show.name + ' on ' + feed_configuration['title'])
+    # TODO: use show description here
 
-    if SHOWS_BY_PRESENTER_WITH_URL[presenter_name][0].presenter.url:
-        feed_configuration['url'] = SHOWS_BY_PRESENTER_WITH_URL[presenter_name][0].presenter.url
+    if PODCASTS_BY_SHOW_WITH_URL[show_name][0].show.url:
+        feed_configuration['url'] = PODCASTS_BY_SHOW_WITH_URL[show_name][0].show.url
 
-    return render_template('rss.xml.j2',
-                           feed_url=(SERVER_URL + '/show/' + presenter_name + '.rss'),
+    return render_template('rss.xml',
+                           feed_url=(CONFIGURATION['server_url'] + '/show/' + show_name + '.rss'),
                            feed_configuration=feed_configuration,
-                           shows=SHOWS_BY_PRESENTER_WITH_URL[presenter_name])
+                           podcasts=PODCASTS_BY_SHOW_WITH_URL[show_name])
 
 
-@SERVER.route(ARTWORK_HREF)
+@SERVER.route('/artwork')
 def podcast_artwork():
     return send_from_directory(os.path.join(SERVER.root_path, 'static'),
                                'artwork.png', mimetype='image/png')
@@ -100,13 +100,11 @@ def favicon():
 if __name__ == '__main__':
     logging.info('Starting server...')
 
-    CONFIGURATION = init_configuration()
-    CONFIGURATION['thumbnail_url'] = SERVER_URL + ARTWORK_HREF
-
-    SHOWS, SHOWS_BY_PRESENTER_WITH_URL, PRESENTERS_WITH_URLS = refresh_data(CONFIGURATION,
-                                                                            SHOWS,
-                                                                            SHOWS_BY_PRESENTER_WITH_URL,
-                                                                            PRESENTERS_WITH_URLS)
+    CONFIGURATION = load_configuration()
+    PODCASTS, PODCASTS_BY_SHOW_WITH_URL, SHOWS_WITH_URLS = refresh(CONFIGURATION,
+                                                                   PODCASTS,
+                                                                   PODCASTS_BY_SHOW_WITH_URL,
+                                                                   SHOWS_WITH_URLS)
 
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(environ.get('PORT', 5000))

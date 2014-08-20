@@ -21,3 +21,6 @@ podcast_owner_email: mail@benjeffrey.net
 
 scrape_url: http://rinse.fm/podcasts/
 url: http://rinse.fm/podcasts/
+
+server_url: http://rinse.benjeffrey.net
+thumbnail_url: http://rinse.benjeffrey.net/artwork
