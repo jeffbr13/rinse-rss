@@ -30,16 +30,16 @@ SHOWS_WITH_URLS = None
 LAST_REFRESH = None
 
 
-def get_podcasts(configuration):
+def get_podcasts():
     logging.info('Getting podcast items...')
     LAST_REFRESH = datetime.now()
-    return rinse.podcasts(configuration['scrape_url'])
+    return rinse.podcasts(app.config['PODCASTS_FEED']['scrape_url'])
 
 
-def refresh(configuration, podcasts, podcasts_by_show_with_url, shows_with_urls):
+def refresh(podcasts, podcasts_by_show_with_url, shows_with_urls):
     if not LAST_REFRESH or LAST_REFRESH < (datetime.now() - timedelta(minutes=15)):
         logging.info('Refreshing data.')
-        podcasts = sorted(get_podcasts(configuration), key=lambda item: item.pub_date)
+        podcasts = sorted(get_podcasts(), key=lambda item: item.pub_date)
         podcasts_by_show_with_url = groupby_all([item for item in podcasts if item.show.url],
                                                 key=lambda item: item.show.url_safe_name)
         shows_with_urls = sorted(
@@ -50,8 +50,7 @@ def refresh(configuration, podcasts, podcasts_by_show_with_url, shows_with_urls)
         return podcasts, podcasts_by_show_with_url, shows_with_urls
 
 
-PODCASTS, PODCASTS_BY_SHOW_WITH_URL, SHOWS_WITH_URLS = refresh(app.config['PODCASTS_FEED'],
-                                                               PODCASTS,
+PODCASTS, PODCASTS_BY_SHOW_WITH_URL, SHOWS_WITH_URLS = refresh(PODCASTS,
                                                                PODCASTS_BY_SHOW_WITH_URL,
                                                                SHOWS_WITH_URLS)
 
