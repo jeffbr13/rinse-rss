@@ -20,16 +20,13 @@ logging.basicConfig(level=logging.DEBUG) if bool(environ.get('DEBUG', False)) el
 SERVER = Flask(__name__)
 
 CONFIGURATION = None
+with open('feed-configuration.yaml') as f:
+        CONFIGURATION = yaml_load(f)
+
 PODCASTS = None
 PODCASTS_BY_SHOW_WITH_URL = None
 SHOWS_WITH_URLS = None
 LAST_REFRESH = None
-
-
-def load_configuration():
-    logging.info('Loading configuration...')
-    with open('feed-configuration.yaml') as f:
-        return yaml_load(f)
 
 
 def get_podcasts(configuration):
@@ -51,6 +48,11 @@ def refresh(configuration, podcasts, podcasts_by_show_with_url, shows_with_urls)
     else:
         return podcasts, podcasts_by_show_with_url, shows_with_urls
 
+
+PODCASTS, PODCASTS_BY_SHOW_WITH_URL, SHOWS_WITH_URLS = refresh(CONFIGURATION,
+                                                               PODCASTS,
+                                                               PODCASTS_BY_SHOW_WITH_URL,
+                                                               SHOWS_WITH_URLS)
 
 @SERVER.route('/')
 def index():
@@ -100,14 +102,6 @@ def favicon():
 
 
 if __name__ == '__main__':
-    logging.info('Starting server...')
-
-    CONFIGURATION = load_configuration()
-    PODCASTS, PODCASTS_BY_SHOW_WITH_URL, SHOWS_WITH_URLS = refresh(CONFIGURATION,
-                                                                   PODCASTS,
-                                                                   PODCASTS_BY_SHOW_WITH_URL,
-                                                                   SHOWS_WITH_URLS)
-
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(environ.get('PORT', 5000))
     logging.debug('Launching Flask app...')
