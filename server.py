@@ -5,10 +5,8 @@ import logging
 import os.path
 from datetime import datetime, timedelta
 from os import environ
-from urllib.parse import quote as url_quote, unquote as url_unquote
 
-import requests
-from flask import Flask, render_template, request, jsonify, abort, send_from_directory
+from flask import Flask, render_template, abort, send_from_directory
 from yaml import load as yaml_load
 
 import rinse
