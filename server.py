@@ -17,9 +17,12 @@ logging.basicConfig(level=logging.DEBUG) if bool(environ.get('DEBUG', False)) el
 
 app = Flask(__name__)
 
-FEED_CONFIGURATION = None
-with open('feed-configuration.yaml') as f:
-        FEED_CONFIGURATION = yaml_load(f)
+with open('config.yaml') as f:
+    app.config.update(yaml_load(f))
+
+app.config.update(
+    DEBUG=bool(environ.get('DEBUG', False)),
+)
 
 PODCASTS = None
 PODCASTS_BY_SHOW_WITH_URL = None
@@ -47,7 +50,7 @@ def refresh(configuration, podcasts, podcasts_by_show_with_url, shows_with_urls)
         return podcasts, podcasts_by_show_with_url, shows_with_urls
 
 
-PODCASTS, PODCASTS_BY_SHOW_WITH_URL, SHOWS_WITH_URLS = refresh(FEED_CONFIGURATION,
+PODCASTS, PODCASTS_BY_SHOW_WITH_URL, SHOWS_WITH_URLS = refresh(app.config['PODCASTS_FEED'],
                                                                PODCASTS,
                                                                PODCASTS_BY_SHOW_WITH_URL,
                                                                SHOWS_WITH_URLS)
@@ -62,8 +65,8 @@ def index():
 @app.route('/podcasts')
 def main_feed():
     return render_template('rss.xml',
-                           feed_url=(FEED_CONFIGURATION['server_url'] + '/rss'),
-                           feed_configuration=FEED_CONFIGURATION,
+                           feed_url=('http://' + app.config['PODCASTS_FEED']['server_url'] + '/podcasts'),
+                           feed_configuration=app.config['PODCASTS_FEED'],
                            podcasts=PODCASTS)
 
 
@@ -72,7 +75,7 @@ def show_podcast_feed(show_name):
     if not show_name in PODCASTS_BY_SHOW_WITH_URL:
         abort(404)
 
-    feed_configuration = FEED_CONFIGURATION.copy()
+    feed_configuration = app.config['PODCASTS_FEED'].copy()
     feed_configuration['title'] = (PODCASTS_BY_SHOW_WITH_URL[show_name][0].show.name + ' on ' + feed_configuration['title'])
 
     if PODCASTS_BY_SHOW_WITH_URL[show_name][0].description:
@@ -82,7 +85,7 @@ def show_podcast_feed(show_name):
         feed_configuration['url'] = PODCASTS_BY_SHOW_WITH_URL[show_name][0].show.url
 
     return render_template('rss.xml',
-                           feed_url=(FEED_CONFIGURATION['server_url'] + '/show/' + show_name + '.rss'),
+                           feed_url=('http://' + app.config['PODCASTS_FEED']['server_url'] + '/show/' + show_name + '.rss'),
                            feed_configuration=feed_configuration,
                            podcasts=PODCASTS_BY_SHOW_WITH_URL[show_name])
 
@@ -103,4 +106,4 @@ if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(environ.get('PORT', 5000))
     logging.debug('Launching Flask app...')
-    app.run(host='0.0.0.0', port=port, debug=bool(environ.get('DEBUG', False)))
+    app.run(host='0.0.0.0', port=port)
