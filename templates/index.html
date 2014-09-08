@@ -9,6 +9,19 @@
 
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="https://benjeffrey.com/stylesheet.css" type="text/css" media="screen">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='foundation-icons/foundation-icons.css') }}">
+
+    <style type="text/css">
+        ul {
+            list-style-type: none;
+        }
+        ul li:before {
+            font-family: 'foundation-icons';
+            content: "\f1aa";
+            float: left;
+            width: 1.4em;
+        }
+    </style>
 </head>
 <body>
 
@@ -21,7 +34,9 @@
 
     <p>So no worries, I built my own unofficial RSS feed! It's <a href="https://github.com/jeffbr13/rinse-rss">open-source</a> and feeds are available below:</p>
 
-    <ul><li><a id="rss" href="/podcasts">all Rinse FM podcasts</a></li></ul>
+    <ul>
+        <li><a id="rss" href="/podcasts">full feed of Rinse FM podcasts</a></li>
+    </ul>
 
     <h2 id="shows"><a href="#shows">show feeds</a></h2>
     <ul>
