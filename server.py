@@ -26,7 +26,7 @@ with open('config.yaml') as f:
 
 app.config.update(
     DEBUG=bool(environ.get('DEBUG', False)),
-    SQLALCHEMY_DATABASE_URI=(environ.get("SQLALCHEMY_DATABASE_URI", "sqlite://:memory:")))
+    SQLALCHEMY_DATABASE_URI=(environ.get("SQLALCHEMY_DATABASE_URI", "sqlite://")))
 
 db.init_app(app)
 migrate = Migrate(app, db)
