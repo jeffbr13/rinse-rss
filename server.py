@@ -9,7 +9,6 @@ from os import environ
 from flask import Flask, render_template, send_from_directory
 from flask.ext.migrate import Migrate, MigrateCommand
 from flask.ext.script import Manager
-from flask.ext.sqlalchemy import SQLAlchemy
 from yaml import load as yaml_load
 
 from rinse import db, IndividualPodcast, RecurringShow
@@ -53,6 +52,7 @@ def full_feed():
 
 @app.route('/show/<show_slug>.rss')
 def recurring_show_feed(show_slug):
+    #TODO: generate custom image for each show
     show = RecurringShow.query.filter(slug=show_slug).first_or_404()
 
     feed_configuration = app.config['PODCASTS_FEED'].copy()
