@@ -21,21 +21,21 @@
 
         <itunes:image href="{{ feed_configuration.thumbnail_url }}"/>
         <itunes:category text="{{ feed_configuration.category }}"></itunes:category>
-        <itunes:explicit>no</itunes:explicit>
+        <itunes:explicit>yes</itunes:explicit>
 
 
         {% for podcast in podcasts %}
         <item>
            <title>{{ podcast.title | escape }}</title>
-           <description>{{ podcast.description | escape }}</description>
-           <pubDate>{{ podcast.pub_date }}</pubDate>
-           <guid>{{ podcast.enclosure.url }}</guid>
+           <description>{{ podcast.show.description | escape }}</description>
+           <pubDate>{{ podcast.broadcast_date }}</pubDate>
+           <guid>{{ podcast.guid }}</guid>
 
-           <itunes:summary>{{ podcast.description | escape}}</itunes:summary>
+           <itunes:summary>{{ podcast.show.description | escape}}</itunes:summary>
            <itunes:author>{{ podcast.show.name | escape}}</itunes:author>
 
-           <link>{{ podcast.url }}</link>
-           <enclosure url="{{ podcast.enclosure.url }}" length="{{ podcast.enclosure.content_length }}" type="{{ podcast.enclosure.content_type }}"/>
+           <link>{{ podcast.show.web_url }}</link>
+           <enclosure url="{{ podcast.enclosure_url }}" length="{{ podcast.enclosure_content_length }}" type="{{ podcast.enclosure_content_type }}"/>
         </item>
         {% endfor %}
 

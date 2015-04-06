@@ -39,7 +39,7 @@ manager.add_command("db", MigrateCommand)
 def index():
     """Serve an index of all podcast feed URLs.
     """
-    return render_template('index.html', shows=RecurringShow.query.all())
+    return render_template('index.html', shows=sorted(RecurringShow.query.all(), key=lambda x: x.slug))
 
 
 @app.route('/podcasts')
@@ -53,7 +53,7 @@ def full_feed():
 @app.route('/show/<show_slug>.rss')
 def recurring_show_feed(show_slug):
     #TODO: generate custom image for each show
-    show = RecurringShow.query.filter(slug=show_slug).first_or_404()
+    show = RecurringShow.query.filter_by(slug=show_slug).first_or_404()
 
     feed_configuration = app.config['PODCASTS_FEED'].copy()
     feed_configuration["title"] = show.name + " on " + feed_configuration["title"]
@@ -66,7 +66,7 @@ def recurring_show_feed(show_slug):
     return render_template('rss.xml',
                            feed_url=('http://' + app.config['PODCASTS_FEED']['server_url'] + '/show/' + show_slug + '.rss'),
                            feed_configuration=feed_configuration,
-                           podcasts=IndividualPodcast.query.filter(show_slug=show.slug))
+                           podcasts=IndividualPodcast.query.filter_by(show_slug=show.slug))
 
 
 @app.route('/artwork')
