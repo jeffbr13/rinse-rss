@@ -58,3 +58,6 @@ docs/_build/
 
 # MongoDB temporary data directory
 data/db/
+
+# Celery beat schedule database
+celerybeat-schedule

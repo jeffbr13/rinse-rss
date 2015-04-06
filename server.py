@@ -9,14 +9,12 @@ from os import environ
 from flask import Flask, render_template, send_from_directory
 from flask.ext.migrate import Migrate, MigrateCommand
 from flask.ext.script import Manager
-from flask.ext.sqlalchemy import SQLAlchemy
-
 from yaml import load as yaml_load
 
+from rinse import db, IndividualPodcast, RecurringShow
 
-import rinse
-from helpers import groupby_all
 
+##### App Configuration ################################################################################################
 
 logging.basicConfig(level=logging.DEBUG) if bool(environ.get('DEBUG', False)) else logging.basicConfig(level=logging.INFO)
 
@@ -27,63 +25,15 @@ with open('config.yaml') as f:
 
 app.config.update(
     DEBUG=bool(environ.get('DEBUG', False)),
-    SQLALCHEMY_DATABASE_URI=(environ.get("SQLALCHEMY_DATABASE_URI", "sqlite://:memory:")))
+    SQLALCHEMY_DATABASE_URI=(environ.get("SQLALCHEMY_DATABASE_URI", "sqlite://")))
 
-db = SQLAlchemy(app)
+db.init_app(app)
 migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command("db", MigrateCommand)
 
 
-class IndividualPodcast(db.Model):
-    guid = db.Column(db.String(200), primary_key=True)
-    title = db.Column(db.String(200))
-    description = db.Column(db.Text)
-    broadcast_date = db.Column(db.DateTime)
-    web_url = db.Column(db.String(200))
-
-    enclosure_url = db.Column(db.String(200))
-    enclosure_content_length = db.Column(db.Integer)
-    enclosure_content_type = db.Column(db.String(100))
-
-    show_slug = db.Column(db.String(200), db.ForeignKey("recurring_show.slug"))
-
-    def __init__(self, title, description, broadcast_date, web_url,
-                       enclosure_url, enclosure_content_length, enclosure_content_type,
-                       show):
-        self.title = title
-        self.description = description
-        self.broadcast_date = broadcast_date
-        self.web_url = web_url
-        self.enclosure_url = enclosure_url
-        self.enclosure_content_length = enclosure_content_length
-        self.enclosure_content_type = enclosure_content_type
-        self.show_slug = show.slug
-        self.guid = self.enclosure_url
-
-    def __repr__(self):
-        return "<IndividualPodcast: %s>" % self.guid
-
-
-class RecurringShow(db.Model):
-    slug = db.Column(db.String(200), primary_key=True)
-
-
-    name = db.Column(db.String(200))
-    description = db.Column(db.Text)
-    web_url = db.Column(db.String(200))
-
-    podcasts = db.relationship("IndividualPodcast", backref=db.backref("show"))
-
-    def __init__(self, slug, name, description, web_url):
-        self.slug = slug
-        self.name = name
-        self.description = description
-        self.web_url = web_url
-
-    def __repr__(self):
-        return "<RecurringShow: %s>" % self.slug
-
+##### Routes ###########################################################################################################
 
 @app.route('/')
 def index():
@@ -102,6 +52,7 @@ def full_feed():
 
 @app.route('/show/<show_slug>.rss')
 def recurring_show_feed(show_slug):
+    #TODO: generate custom image for each show
     show = RecurringShow.query.filter(slug=show_slug).first_or_404()
 
     feed_configuration = app.config['PODCASTS_FEED'].copy()
@@ -135,6 +86,8 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+
+##### UI Commands ######################################################################################################
 
 @manager.command
 def run():

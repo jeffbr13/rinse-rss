@@ -17,5 +17,5 @@ Database migrations are managed through [Flask-Migrate](https://flask-migrate.re
 
 ```sh
 python server.py db migrate     # to create a database migration
-python server.py db update      # to apply database migrations
+python server.py db upgrade      # to apply database migrations
 ```
