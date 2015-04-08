@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from yaml import load as yaml_load
 
-from rinse import IndividualPodcast, RecurringShow, scrape_podcasts, scrape_shows
+from rinse import IndividualPodcast, RecurringShow, scrape_podcasts, scrape_shows, scrape_recurring_show
 
 
 logging.basicConfig(level=logging.DEBUG) if bool(environ.get('DEBUG')) else logging.basicConfig(level=logging.INFO)
@@ -37,6 +37,11 @@ def refresh_data():
         db_session.merge(show)
     for podcast in scrape_podcasts(podcasts_feed_config['podcast_scrape_url']):
         logging.info("Merging %s into database…" % podcast)
+        if podcast.show_slug and not db_session.query(RecurringShow).get(podcast.show_slug):
+            logging.info("Show for %s doesn't exist in database, scraping from website…" % podcast)
+            show = scrape_recurring_show('http://rinse.fm/artists/{}/'.format(podcast.show_slug))
+            logging.info("Merging {} into database for {}".format(show, podcast))
+            db_session.merge(show)
         db_session.merge(podcast)
     db_session.commit()
 
