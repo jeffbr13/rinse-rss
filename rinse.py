@@ -78,10 +78,7 @@ def scrape_recurring_show(show_url):
     logging.debug(show_slug)
     show_page = html(requests.get(show_url).content)
     base_xpath = '/html/body/div[@id="wrapper"]/div[@id="container"]/div[contains(@class, "rounded")]/div'
-    try:
-        show_name = show_page.xpath(base_xpath + '/div/h2//text()')[0]
-    except IndexError:
-        logging.error(show_page.xpath(base_xpath + '/div/h2//text()'))
+    show_name = show_page.xpath(base_xpath + '/div/h2//text()')[0]
     logging.debug('Successfully extracted show name ({0}) from {1}'.format(show_name, show_url))
     description = '\n\n'.join(show_page.xpath(base_xpath + '/div[contains(@class, "entry")]/p//text()'))
     logging.debug('Successfully extracted show description from {0}'.format(show_url))
