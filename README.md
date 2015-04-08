@@ -10,6 +10,20 @@ python server.py run    # to run the webserver
 ```
 
 
+scraping data
+-------------
+
+`rinse-rss` uses a [Celery](http://www.celeryproject.org) worker to scrape the Rinse FM website,
+and update the database in the background every quarter-hour.
+
+```sh
+celery -A tasks worker -B -l info   # run foreground worker
+
+celery multi start -A tasks worker -B -l info   # run background worker
+celery multi stopwait -A tasks worker -B -l info    # stop background worker
+```
+
+
 database maintenance
 --------------------
 
