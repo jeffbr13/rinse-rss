@@ -14,23 +14,6 @@ docker-compose up
 
 Configuration is in `docker-compose.yml`.
 
-Environment Variables
----------------------
-
-* `SQLALCHEMY_DATABASE_URI`: a remote Postgres database is (currently) required. Set `?client_encoding=utf8` for this.
-* `DEBUG`: activate the Werkzeug debugger on the webserver and increase logging.
-
-
-Database Maintenance
---------------------
-
-Database migrations are managed through [Flask-Migrate](https://flask-migrate.readthedocs.org).
-
-```sh
-python server.py db migrate     # to create a database migration
-python server.py db upgrade      # to apply database migrations
-```
-
 
 Running Individual Components
 -----------------------------
@@ -39,8 +22,8 @@ Running Individual Components
 
 
 ```sh
-python server.py run            # to run the webserver locally, or:
-docker-compose up webserver     # to run the webserver in a Docker container
+docker-compose up webserver     # to run the webserver in it's Docker container, or:
+python server.py run            # to run the webserver locally
 ```
 
 ### Scrape Worker
@@ -55,4 +38,22 @@ celery worker --app=tasks --beat --loglevel=                # run foreground wor
 
 celery multi start --app=tasks --beat --loglevel=debug      # run background worker
 celery multi stopwait --app=tasks --beat --loglevel=debug   # stop background worker
+```
+
+
+Debugging
+---------
+
+- `web` container: set the `DEBUG` environment variable
+- `worker` container: set `--loglevel=debug` in the Celery command
+
+
+Database Maintenance
+--------------------
+
+Database migrations are managed through [Flask-Migrate](https://flask-migrate.readthedocs.org).
+
+```sh
+python server.py db migrate                         # to create a database migration
+docker-compose run web python server.py db upgrade  # to apply database migrations
 ```
