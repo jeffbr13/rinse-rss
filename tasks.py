@@ -47,7 +47,7 @@ def refresh_data():
                 db_session.merge(show)
             except Exception as e:
                 logging.error("Skipping podcast, couldn't create show: {}".format(e))
-                pass
+                continue
         db_session.merge(podcast)
     db_session.commit()
 
