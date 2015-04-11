@@ -2,124 +2,144 @@
 import logging
 from collections import namedtuple
 from datetime import datetime
+from flask.ext.sqlalchemy import SQLAlchemy
 
 import requests
 from lxml.html import fromstring as html
 
 
-Enclosure = namedtuple('Enclosure', ['content_length',
-                                     'content_type',
-                                     'url'])
+db = SQLAlchemy()
 
 
-Podcast = namedtuple('Podcast', ['title',
-                                 'description',
-                                 'show',
-                                 'pub_date',
-                                 'guid',
-                                 'url',
-                                 'enclosure'])
+class IndividualPodcast(db.Model):
+    guid = db.Column(db.String(200), primary_key=True)
+    title = db.Column(db.String(200))
+    broadcast_date = db.Column(db.DateTime)
+
+    enclosure_url = db.Column(db.String(200))
+    enclosure_content_length = db.Column(db.Integer)
+    enclosure_content_type = db.Column(db.String(100))
+
+    show_slug = db.Column(db.String(200), db.ForeignKey("recurring_show.slug"), nullable=True)
+
+    def __init__(self, title, broadcast_date,
+                 enclosure_url, enclosure_content_length, enclosure_content_type,
+                 show_slug):
+        self.title = title
+        self.broadcast_date = broadcast_date
+        self.enclosure_url = enclosure_url
+        self.enclosure_content_length = enclosure_content_length
+        self.enclosure_content_type = enclosure_content_type
+        self.show_slug = show_slug
+        self.guid = self.enclosure_url
+
+    def __repr__(self):
+        return "<IndividualPodcast: %s>" % self.guid
 
 
-Show = namedtuple('Show', ['name',
-                           'url_safe_name',
-                           'description',
-                           'url'])
+class RecurringShow(db.Model):
+    slug = db.Column(db.String(200), primary_key=True)
+
+    name = db.Column(db.String(200))
+    description = db.Column(db.Text)
+    web_url = db.Column(db.String(200))
+
+    podcasts = db.relationship("IndividualPodcast", backref=db.backref("show"))
+
+    def __init__(self, slug, name, description, web_url):
+        self.slug = slug
+        self.name = name
+        self.description = description
+        self.web_url = web_url
+
+    def __repr__(self):
+        return "<RecurringShow: %s>" % self.slug
 
 
-def show(element):
-    """
-    Scrape show information about a div.podcast-list-item element.
-
-    :type element: lxml.html.HtmlElement
-    :rtype: Show
-    """
-    logging.debug('Initialising broadcast show information from element')
-    url = element.xpath('./div/h3/a/@href')
-    if url:
-        url = url[0]
-        logging.debug(url)
-        url_safe_name = url.rsplit('/', 2)[-2]
-        logging.debug(url_safe_name)
-    else:
-        url = None
-        url_safe_name = None
-    name, description = show_details(url)
-    if not name:
-        name = [text.strip() for text in element.xpath('.//text()') if text.strip()][0]
-
-    logging.debug('Successfully initialised <Show: {0}>'.format(name))
-    return Show(name, url_safe_name, description, url)
-
-
-def show_details(show_page_url):
-    """
-    Attempts to scrape the Rinse FM show page for information.
-
-    :type show_page_url: str
-    :rtype: (str, str)
-    :returns: The show's name and a description, if one exists. An empty string, otherwise.
-    """
-    logging.debug('Fetching show description from "{0}"'.format(show_page_url))
-    if not show_page_url:
-        return (None, None)
-
-    show_page = html(requests.get(show_page_url).content)
-    base_xpath = '/html/body/div[@id="wrapper"]/div[@id="container"]/div[contains(@class, "rounded")]/div'
-
+def recurring_show_slug(show_url):
+    """Given the URL of a RecurringShow, extract the show's unique Rinse FM slug."""
+    logging.debug("splitting %s" % show_url)
     try:
-        show_name = show_page.xpath(base_xpath + '/div/h2/text()')[0]
-        logging.debug('Successfully extracted show name ({0}) from {1}'.format(show_name, show_page_url))
-    except IndexError:
-        show_name = None
-
-    presenter_description = '\n\n'.join(show_page.xpath(base_xpath + '/div[contains(@class, "entry")]/p//text()'))
-    logging.debug('Successfully extracted show description from {0}'.format(show_page_url))
-    return (show_name, presenter_description)
+        return show_url.rsplit('/', 2)[-2]
+    except AttributeError:
+        # retry in the case that we get a list (sometimes XPath does this)
+        return recurring_show_slug(show_url[0])
 
 
-def podcast(element):
+def scrape_recurring_show(show_url):
+    """
+    Scrape show information from a show page.
+
+    :type show_url: str
+    :rtype: RecurringShow
+    """
+    logging.debug('Initialising broadcast show information from URL {}'.format(show_url))
+    show_slug = show_url.rsplit('/', 2)[-2]
+    logging.debug(show_slug)
+    show_page = html(requests.get(show_url).content)
+    base_xpath = '/html/body/div[@id="wrapper"]/div[@id="container"]/div[contains(@class, "rounded")]/div'
+    show_name = show_page.xpath(base_xpath + '/div/h2//text()')[0]
+    logging.debug('Successfully extracted show name ({0}) from {1}'.format(show_name, show_url))
+    description = '\n\n'.join(show_page.xpath(base_xpath + '/div[contains(@class, "entry")]/p//text()'))
+    logging.debug('Successfully extracted show description from {0}'.format(show_url))
+    show = RecurringShow(name=show_name, slug=recurring_show_slug(show_url), description=description, web_url=show_url)
+    logging.debug('Successfully initialised %s' % show)
+    return show
+
+
+def scrape_individual_podcast(html_element):
     """
     Build a Podcast using the information in a div.podcast-list-item from the podcasts page.
 
-    :type element: lxml.html.HtmlElement
-    :rtype: Podcast
+    :type html_element: lxml.html.HtmlElement
+    :rtype: IndividualPodcast
     """
-    logging.info('Initialising Podcast from element')
-    broadcast_date = datetime.strptime(element.xpath('./@data-air_day')[0], '%Y-%m-%d')
-    broadcast_time = datetime.strptime(element.xpath('./@data-airtime')[0], '%H')
+    logging.info('Initialising Podcast from HTML element')
+    broadcast_date = datetime.strptime(html_element.xpath('./@data-air_day')[0], '%Y-%m-%d')
+    broadcast_time = datetime.strptime(html_element.xpath('./@data-airtime')[0], '%H')
     broadcast_datetime = datetime.combine(broadcast_date.date(), broadcast_time.time())
 
-    broadcast_show = show(element)
+    title = " ".join(html_element.xpath(".//h3//text()")).strip()
+    logging.debug("title <- %s" % title)
+    show_url = html_element.xpath(".//h3/a/@href")
+    try:
+        show_slug = recurring_show_slug(show_url)
+    except :
+        show_slug = None
 
     # Get accurate download information for the RSS Enclosure
-    download_url = element.xpath('./div/div[@class="download icon"]/a/@href')[0].strip()
+    download_url = html_element.xpath('./div/div[@class="download icon"]/a/@href')[0].strip()
     download_headers = requests.head(download_url).headers
 
-    download_enclosure = Enclosure(url=download_url,
-                                   content_length=download_headers.get('content-length'),
-                                   content_type=download_headers.get('content-type'))
-
-    show_description = broadcast_show.description if broadcast_show.description else ''
-
-    logging.info('Successfully got <Podcast: {0}> data from element'.format(broadcast_show.name))
-    return Podcast(title=broadcast_show.name,
-                   description=show_description,
-                   show=broadcast_show,
-                   pub_date=broadcast_datetime.strftime('%a, %d %b %Y %H:%M:%S +0000'),
-                   guid=download_url,
-                   url=(broadcast_show.url if broadcast_show.url else download_enclosure.url),
-                   enclosure=download_enclosure)
+    return IndividualPodcast(title=title,
+                             broadcast_date=broadcast_datetime.strftime("%a, %d %b %Y %H:%M:%S +0000"),
+                             enclosure_url=download_url,
+                             enclosure_content_length=download_headers.get("content-length"),
+                             enclosure_content_type=download_headers.get("content-type"),
+                             show_slug=show_slug)
 
 
-def podcasts(scrape_url):
+def scrape_podcasts(scrape_url):
     """
-    :param scrape_url: Webpage URL to scrape for Podcasts
-    :return: An iterable of scraped Podcasts
+    :param scrape_url: URL of webpage to scrape for IndividualPodcasts
+    :return: a collection of scraped Podcasts
 
-    :rtype: PodcastShow
+    :rtype: [IndividualPodcast]
     """
-    logging.info("Fetching podcast items from {0}".format(scrape_url))
+    logging.info("Fetching podcast data from {0}".format(scrape_url))
     podcasts_page = html(requests.get(scrape_url).content)
     #TODO: scrape more than the front page
-    return [podcast(div) for div in podcasts_page.xpath('//div[contains(@class, "podcast-list-item")]')]
+    return [scrape_individual_podcast(div) for div in podcasts_page.xpath('//div[contains(@class, "podcast-list-item")]')]
+
+
+def scrape_shows(scrape_url):
+    """
+    :param scrape_url: URL of webpage to scrape for RecurringShows
+    :return: a collection of RecurringShows
+    :rtype: [RecurringShow]
+    """
+    logging.info("Fetching shows data from {}".format(scrape_url))
+    shows_page = html(requests.get(scrape_url).content)
+    hrefs = shows_page.xpath("//a[contains(@class, 'artist')]/@href")
+    return [scrape_recurring_show(href) for href in hrefs]
+

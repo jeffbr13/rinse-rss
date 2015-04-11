@@ -20,7 +20,8 @@ PODCASTS_FEED:
   podcast_owner: Ben Jeffrey
   podcast_owner_email: mail@benjeffrey.net
 
-  scrape_url: http://rinse.fm/podcasts/
+  podcast_scrape_url: http://rinse.fm/podcasts/
+  show_scrape_url: http://rinse.fm/family/
   url: http://rinse.fm/podcasts/
 
   server_url: http://rinse.benjeffrey.net

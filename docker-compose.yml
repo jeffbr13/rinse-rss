@@ -1,0 +1,25 @@
+# container with Flask web server
+web:
+  build: .              # build using default Dockerfile
+  command: python server.py run
+  volumes:
+    - .:/opt/rinse-rss  # mount current directory inside container
+  ports:
+    - "5000:5000"
+  env_file:
+    - .env
+# Redis cache container
+redis:
+  image: redis
+# container with Celery worker
+worker:
+  build: .
+  command: celery worker --app=tasks --beat --loglevel=debug
+  volumes:
+    - .:/opt/rinse-rss
+  links:
+    - redis
+  environment:
+    - C_FORCE_ROOT=TRUE
+  env_file:
+    - .env
