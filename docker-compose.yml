@@ -1,5 +1,13 @@
+dbdata:
+  image: postgres:9
+  volumes:
+    - /var/lib/postgresql
+  command: echo "This data-only container should exit immediately."
+
 db:
-  image: postgres:9.4
+  image: postgres:9
+  volumes_from:
+    - dbdata
   environment:
     - POSTGRES_USER=rinse-rss
 
@@ -11,7 +19,7 @@ web:
   links:
     - db
   environment:
-    - SQLALCHEMY_DATABASE_URI=postgres://rinse-rss@db
+    - SQLALCHEMY_DATABASE_URI=postgres://rinse-rss@db/rinse-rss
   ports:
     - "5000:5000"
 
@@ -21,7 +29,7 @@ redis:
 
 worker:
   build: .
-  command: celery worker --app=tasks --beat --loglevel=debug
+  command: celery worker --app=tasks --beat --loglevel=info
   volumes:
     - .:/opt/rinse-rss
   links:
@@ -29,4 +37,4 @@ worker:
     - db
   environment:
     - C_FORCE_ROOT=TRUE
-    - SQLALCHEMY_DATABASE_URI=postgres://rinse-rss@db
+    - SQLALCHEMY_DATABASE_URI=postgres://rinse-rss@db/rinse-rss
