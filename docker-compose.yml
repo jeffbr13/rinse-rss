@@ -1,17 +1,24 @@
-# container with Flask web server
+db:
+  image: postgres:9.4
+  environment:
+    - POSTGRES_USER=rinse-rss
+
 web:
   build: .              # build using default Dockerfile
   command: python server.py run
   volumes:
     - .:/opt/rinse-rss  # mount current directory inside container
+  links:
+    - db
+  environment:
+    - SQLALCHEMY_DATABASE_URI=postgres://rinse-rss@db
   ports:
     - "5000:5000"
-  env_file:
-    - .env
-# Redis cache container
+
+
 redis:
   image: redis
-# container with Celery worker
+
 worker:
   build: .
   command: celery worker --app=tasks --beat --loglevel=debug
@@ -19,7 +26,7 @@ worker:
     - .:/opt/rinse-rss
   links:
     - redis
+    - db
   environment:
     - C_FORCE_ROOT=TRUE
-  env_file:
-    - .env
+    - SQLALCHEMY_DATABASE_URI=postgres://rinse-rss@db
