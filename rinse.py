@@ -82,9 +82,11 @@ def scrape_recurring_show(show_url):
         show_name = show_page.xpath(base_xpath + '/div/h2//text()')[0]
         description = '\n\n'.join(show_page.xpath(base_xpath + '/div[contains(@class, "entry")]/p//text()'))
     except IndexError:
-        logging.error("IndexError: likely XPath query error due to webpage misrendering/misloading")
+        logging.error("IndexError creating show: likely XPath query error due to webpage misrendering/misloading")
         raise
-    logging.debug('Successfully extracted show name, description ({}, {}) from {}'.format(show_name, description, show_url))
+    logging.debug('Successfully extracted show name, description ({}, {}...) from {}'.format(show_name,
+                                                                                             description[10],
+                                                                                             show_url))
     show = RecurringShow(name=show_name, slug=recurring_show_slug(show_url), description=description, web_url=show_url)
     logging.debug('Successfully initialised %s' % show)
     return show
@@ -105,7 +107,7 @@ def scrape_individual_podcast(html_element):
         title = " ".join(html_element.xpath(".//h3//text()")).strip()
         show_url = html_element.xpath(".//h3/a/@href")
     except IndexError:
-        logging.error("IndexError: likely XPath query error due to webpage misrendering/misloading")
+        logging.error("IndexError creating podcast: likely XPath query error due to webpage misrendering/misloading")
         raise
     logging.debug("title <- %s" % title)
     try:
@@ -142,6 +144,7 @@ def scrape_podcasts(scrape_url):
         except Exception as e:
             logging.error(e)
     return individual_podcasts
+
 
 def scrape_shows(scrape_url):
     """
