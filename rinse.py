@@ -73,7 +73,7 @@ def scrape_recurring_show(show_url):
     :type show_url: str
     :rtype: RecurringShow
     """
-    logging.debug('Initialising broadcast show information from URL {}'.format(show_url))
+    logging.info('Initialising broadcast show information from URL {}'.format(show_url))
     show_slug = show_url.rsplit('/', 2)[-2]
     logging.debug(show_slug)
     show_page = html(requests.get(show_url).content)
@@ -81,8 +81,9 @@ def scrape_recurring_show(show_url):
         base_xpath = '/html/body/div[@id="wrapper"]/div[@id="container"]/div[contains(@class, "rounded")]/div'
         show_name = show_page.xpath(base_xpath + '/div/h2//text()')[0]
         description = '\n\n'.join(show_page.xpath(base_xpath + '/div[contains(@class, "entry")]/p//text()'))
-    except IndexError as e:
-        logging.error(print(e) + "\n(XPath query error, probably a problem with the fetched webpage)")
+    except IndexError:
+        logging.error("IndexError: likely XPath query error due to webpage misrendering/misloading")
+        raise
     logging.debug('Successfully extracted show name, description ({}, {}) from {}'.format(show_name, description, show_url))
     show = RecurringShow(name=show_name, slug=recurring_show_slug(show_url), description=description, web_url=show_url)
     logging.debug('Successfully initialised %s' % show)
@@ -103,12 +104,13 @@ def scrape_individual_podcast(html_element):
         broadcast_datetime = datetime.combine(broadcast_date.date(), broadcast_time.time())
         title = " ".join(html_element.xpath(".//h3//text()")).strip()
         show_url = html_element.xpath(".//h3/a/@href")
-    except IndexError as e:
-        logging.error(print(e) + "\n(XPath query error, probably a problem with the fetched webpage)")
+    except IndexError:
+        logging.error("IndexError: likely XPath query error due to webpage misrendering/misloading")
+        raise
     logging.debug("title <- %s" % title)
     try:
         show_slug = recurring_show_slug(show_url)
-    except :
+    except:
         show_slug = None
 
     # Get accurate download information for the RSS Enclosure
@@ -133,8 +135,13 @@ def scrape_podcasts(scrape_url):
     logging.info("Fetching podcast data from {0}".format(scrape_url))
     podcasts_page = html(requests.get(scrape_url).content)
     #TODO: scrape more than the front page
-    return [scrape_individual_podcast(div) for div in podcasts_page.xpath('//div[contains(@class, "podcast-list-item")]')]
-
+    individual_podcasts = []
+    for div in podcasts_page.xpath('//div[contains(@class, "podcast-list-item")]'):
+        try:
+            individual_podcasts.append(scrape_individual_podcast(div))
+        except Exception as e:
+            logging.error(e)
+    return individual_podcasts
 
 def scrape_shows(scrape_url):
     """
@@ -145,5 +152,12 @@ def scrape_shows(scrape_url):
     logging.info("Fetching shows data from {}".format(scrape_url))
     shows_page = html(requests.get(scrape_url).content)
     hrefs = shows_page.xpath("//a[contains(@class, 'artist')]/@href")
-    return [scrape_recurring_show(href) for href in hrefs]
+    recurring_shows = []
+    for href in hrefs:
+        try:
+            recurring_shows.append(scrape_recurring_show(href))
+        except Exception as e:
+            logging.error(e)
+            pass
+    return recurring_shows
 
