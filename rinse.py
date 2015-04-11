@@ -77,11 +77,13 @@ def scrape_recurring_show(show_url):
     show_slug = show_url.rsplit('/', 2)[-2]
     logging.debug(show_slug)
     show_page = html(requests.get(show_url).content)
-    base_xpath = '/html/body/div[@id="wrapper"]/div[@id="container"]/div[contains(@class, "rounded")]/div'
-    show_name = show_page.xpath(base_xpath + '/div/h2//text()')[0]
-    logging.debug('Successfully extracted show name ({0}) from {1}'.format(show_name, show_url))
-    description = '\n\n'.join(show_page.xpath(base_xpath + '/div[contains(@class, "entry")]/p//text()'))
-    logging.debug('Successfully extracted show description from {0}'.format(show_url))
+    try:
+        base_xpath = '/html/body/div[@id="wrapper"]/div[@id="container"]/div[contains(@class, "rounded")]/div'
+        show_name = show_page.xpath(base_xpath + '/div/h2//text()')[0]
+        description = '\n\n'.join(show_page.xpath(base_xpath + '/div[contains(@class, "entry")]/p//text()'))
+    except IndexError as e:
+        logging.error(print(e) + "\n(XPath query error, probably a problem with the fetched webpage)")
+    logging.debug('Successfully extracted show name, description ({}, {}) from {}'.format(show_name, description, show_url))
     show = RecurringShow(name=show_name, slug=recurring_show_slug(show_url), description=description, web_url=show_url)
     logging.debug('Successfully initialised %s' % show)
     return show
@@ -95,13 +97,15 @@ def scrape_individual_podcast(html_element):
     :rtype: IndividualPodcast
     """
     logging.info('Initialising Podcast from HTML element')
-    broadcast_date = datetime.strptime(html_element.xpath('./@data-air_day')[0], '%Y-%m-%d')
-    broadcast_time = datetime.strptime(html_element.xpath('./@data-airtime')[0], '%H')
-    broadcast_datetime = datetime.combine(broadcast_date.date(), broadcast_time.time())
-
-    title = " ".join(html_element.xpath(".//h3//text()")).strip()
+    try:
+        broadcast_date = datetime.strptime(html_element.xpath('./@data-air_day')[0], '%Y-%m-%d')
+        broadcast_time = datetime.strptime(html_element.xpath('./@data-airtime')[0], '%H')
+        broadcast_datetime = datetime.combine(broadcast_date.date(), broadcast_time.time())
+        title = " ".join(html_element.xpath(".//h3//text()")).strip()
+        show_url = html_element.xpath(".//h3/a/@href")
+    except IndexError as e:
+        logging.error(print(e) + "\n(XPath query error, probably a problem with the fetched webpage)")
     logging.debug("title <- %s" % title)
-    show_url = html_element.xpath(".//h3/a/@href")
     try:
         show_slug = recurring_show_slug(show_url)
     except :
