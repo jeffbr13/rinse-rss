@@ -60,4 +60,4 @@ docs/_build/
 data/db/
 
 # Celery beat schedule database
-celerybeat-schedule
+celerybeat-schedule*
