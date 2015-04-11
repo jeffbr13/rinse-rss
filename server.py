@@ -3,7 +3,6 @@
 """Server for rinse.benjeffrey.com"""
 import logging
 import os.path
-from datetime import datetime, timedelta
 from os import environ
 
 from flask import Flask, render_template, send_from_directory
