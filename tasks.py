@@ -10,15 +10,17 @@ from yaml import load as yaml_load
 from rinse import IndividualPodcast, RecurringShow, scrape_podcasts, scrape_shows, scrape_recurring_show
 
 
+# configure logging
 logging.basicConfig(level=logging.DEBUG) if bool(environ.get('DEBUG')) else logging.basicConfig(level=logging.INFO)
-app = Celery('tasks', broker='redis://localhost')
+# load configuration
 with open('config.yaml') as f:
     podcasts_feed_config = yaml_load(f)["PODCASTS_FEED"]
-
+# connect to cache and database
+app = Celery('tasks', broker=("redis://" + environ.get("REDIS_PORT_6379_TCP_ADDR", "localhost")))
 db_engine = create_engine(environ.get("SQLALCHEMY_DATABASE_URI", "sqlite://"))
 DatabaseSession = sessionmaker(bind=db_engine)
 
-
+# Schedule tasks
 app.conf.CELERYBEAT_SCHEDULE = {
     'refresh-data-every-quarter-hour': {
         'task': 'tasks.refresh_data',
