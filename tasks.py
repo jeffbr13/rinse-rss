@@ -41,9 +41,13 @@ def refresh_data():
         logging.info("Merging %s into database…" % podcast)
         if podcast.show_slug and not db_session.query(RecurringShow).get(podcast.show_slug):
             logging.info("Show for %s doesn't exist in database, scraping from website…" % podcast)
-            show = scrape_recurring_show('http://rinse.fm/artists/{}/'.format(podcast.show_slug))
-            logging.info("Merging {} into database for {}".format(show, podcast))
-            db_session.merge(show)
+            try:
+                show = scrape_recurring_show('http://rinse.fm/artists/{}/'.format(podcast.show_slug))
+                logging.info("Merging {} into database for {}".format(show, podcast))
+                db_session.merge(show)
+            except Exception as e:
+                logging.error("Skipping podcast, couldn't create show: {}".format(e))
+                pass
         db_session.merge(podcast)
     db_session.commit()
 
