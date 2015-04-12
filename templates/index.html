@@ -1,69 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Rinse FM unofficial podcast feed</title>
+	<title>Rinse FM unofficial podcast feed</title>
 
-    <meta charset="utf-8">
+	<meta charset="utf-8">
 
-    <link rel="alternate" type="application/rss+xml" href="/podcasts" />
+	<link rel="alternate" type="application/rss+xml" href="/podcasts" />
 
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="https://benjeffrey.com/stylesheet.css" type="text/css" media="screen">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='foundation-icons/foundation-icons.css') }}">
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+	<link rel="stylesheet" href="https://benjeffrey.com/stylesheet.css" type="text/css" media="screen">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='foundation-icons/foundation-icons.css') }}">
 
-    <style type="text/css">
-        ul {
-            list-style-type: none;
-        }
-        ul li:before {
-            font-family: 'foundation-icons';
-            content: "\f1aa";
-            float: left;
-            width: 1.4em;
-        }
-    </style>
+	<style type="text/css">
+		ul {
+			list-style-type: none;
+		}
+		ul li:before {
+			font-family: 'foundation-icons';
+			content: "\f1aa";
+			float: left;
+			width: 1.4em;
+		}
+	</style>
 </head>
 <body>
 
-  <div class="row">
-    <h1><a href="http://rinse.fm/"><img src="http://rinse.fm/wp-content/themes/rp/images/rinselogo.jpg" alt="Rinse FM" /></a><br/> <a href="">unofficial podcast feed</a></h1>
+<div class="row">
+	<h1><a href="http://rinse.fm/"><img src="http://rinse.fm/wp-content/themes/rp/images/rinselogo.jpg" alt="Rinse FM" /></a><br/> <a href="">unofficial podcast feed</a></h1>
 
-    <p><a href="http://rinse.fm/">Rinse FM</a>'s website CMS doesn't enclose the podcast media files in it's podcast RSS feeds, making it impossible to subscribe with podcatchers.</p>
+	<p><a href="http://rinse.fm/">Rinse FM</a>'s website CMS doesn't enclose the podcast media files in it's podcast RSS feeds, making it impossible to subscribe with podcatchers.</p>
 
-    <p>I was using <a href="https://levels.io/rinse-fm-podcast/">@levelsio's Rinse FM podcast</a> with great success for a while. Unfortunately, it seems to break whenever there's a format-change or any erroneous data-entry on Rinse FM's side. I've <a href="https://twitter.com/jeffbr13/status/447019136934486016">tweeted @levelsio in the past to fix issues</a>, but it seems unfair to bug him to keep it maintained, and he's not open-sourced it yet.</p>
+	<p>I was using <a href="https://levels.io/rinse-fm-podcast/">@levelsio's Rinse FM podcast</a> with great success for a while. Unfortunately, it seems to break whenever there's a format-change or any erroneous data-entry on Rinse FM's side. I've <a href="https://twitter.com/jeffbr13/status/447019136934486016">tweeted @levelsio in the past to fix issues</a>, but it seems unfair to bug him to keep it maintained, and he's not open-sourced it yet.</p>
 
-    <p>So no worries, I built my own unofficial RSS feed! It's <a href="https://github.com/jeffbr13/rinse-rss">open-source</a> and feeds are available below:</p>
+	<p>So no worries, I built my own unofficial RSS feed! It's <a href="https://github.com/jeffbr13/rinse-rss">open-source</a> and feeds are available below:</p>
 
-    <ul>
-        <li><a id="rss" href="/podcasts">full feed of Rinse FM podcasts</a></li>
-    </ul>
+	<ul>
+		<li><a id="rss" href="/podcasts">full feed of Rinse FM podcasts</a></li>
+	</ul>
 
-    <h2 id="shows"><a href="#shows">show feeds</a></h2>
-    <ul>
-    {% for show in shows %}
-        <li><a href="/show/{{ show.slug }}.rss">{{ show.name }}</a></li>
-    {% endfor %}
-    </ul>
-  </div>
+	<h2 id="shows"><a href="#shows">show feeds</a></h2>
+	<ul>
+		{% for show in shows %}
+			<li><a href="/show/{{ show.slug }}.rss">{{ show.name }}</a></li>
+		{% endfor %}
+	</ul>
+</div>
 
-  <footer class="row">
-    <p>Built by <a href="https://benjeffrey.net">Ben Jeffrey</a> using <a href="https://python.org">Python 3</a>, <a href="http://flask.pocoo.org/">Flask</a>, and <a href="https://github.com/jeffbr13/rinse-rss/blob/master/requirements.txt">many other awesome projects</a>.</p>
-    <p>⚒</p>
-    <p><a href="https://github.com/jeffbr13/rinse-rss">Source code available</a> under the <a href="https://www.mozilla.org/MPL/2.0/">MPL 2.0</a>, all content Copyright &copy; it's respective owners (probably Rinse FM).</p>
+<footer class="row">
+	<p>⚒</p>
+	<p>Content copyright &copy; it's respective owners (probably Rinse FM).</p>
+	<p><a href="https://github.com/jeffbr13/rinse-rss"><code>rinse-rss</code></a> by <a href="https://benjeffrey.net">Ben Jeffrey</a> with <a href="https://python.org">Python 3</a>, <a href="http://flask.pocoo.org/">Flask</a>, and <a href="https://github.com/jeffbr13/rinse-rss/blob/master/requirements.txt">other awesome projects</a>. Source code available under the <a href="https://www.mozilla.org/MPL/2.0/">MPL 2.0</a>.</p>
+	<p id="version"><a href="https://www.youtube.com/watch?v=rao9gviQQf0"><code>rinse-rss 0.3.2-beezledub</code></a></p>
 
-    <script type="text/javascript">
-        var _gauges = _gauges || [];
-        (function() {
-            var t   = document.createElement('script');
-            t.type  = 'text/javascript';
-            t.async = true;
-            t.id    = 'gauges-tracker';
-            t.setAttribute('data-site-id', '540dfeefe32bb4106a005394');
-            t.src = '//secure.gaug.es/track.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(t, s);
-        })();
-    </script>
-  </footer>
+	<script type="text/javascript">
+		var _gauges = _gauges || [];
+		(function() {
+			var t   = document.createElement('script');
+			t.type  = 'text/javascript';
+			t.async = true;
+			t.id    = 'gauges-tracker';
+			t.setAttribute('data-site-id', '540dfeefe32bb4106a005394');
+			t.src = '//secure.gaug.es/track.js';
+			var s = document.getElementsByTagName('script')[0];
+			s.parentNode.insertBefore(t, s);
+		})();
+	</script>
+</footer>
 </body>
 </html>
