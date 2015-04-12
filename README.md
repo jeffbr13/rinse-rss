@@ -15,6 +15,20 @@ docker-compose up
 Configuration is in `docker-compose.yml`.
 
 
+Deployment
+----------
+
+1) check-out this repository,
+2) copy the Upstart service definition to the required folder,
+3) check it works:
+
+```sh
+git clone https://github.com/jeffbr13/rinse-rss.git /opt/rinse-rss
+cp /opt/rinse-rss/upstart.conf /etc/init/rinse-rss.conf
+service rinse-rss start
+```
+
+
 Running Individual Components
 -----------------------------
 
