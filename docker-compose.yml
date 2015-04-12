@@ -1,25 +1,40 @@
-# container with Flask web server
+dbdata:
+  image: postgres:9
+  volumes:
+    - /var/lib/postgresql
+  command: echo "This data-only container should exit immediately."
+
+db:
+  image: postgres:9
+  volumes_from:
+    - dbdata
+  environment:
+    - POSTGRES_USER=rinse-rss
+
 web:
   build: .              # build using default Dockerfile
   command: python server.py run
   volumes:
     - .:/opt/rinse-rss  # mount current directory inside container
+  links:
+    - db
+  environment:
+    - SQLALCHEMY_DATABASE_URI=postgres://rinse-rss@db/rinse-rss
   ports:
     - "5000:5000"
-  env_file:
-    - .env
-# Redis cache container
+
+
 redis:
   image: redis
-# container with Celery worker
+
 worker:
   build: .
-  command: celery worker --app=tasks --beat --loglevel=debug
+  command: celery worker --app=tasks --beat --loglevel=info
   volumes:
     - .:/opt/rinse-rss
   links:
     - redis
+    - db
   environment:
     - C_FORCE_ROOT=TRUE
-  env_file:
-    - .env
+    - SQLALCHEMY_DATABASE_URI=postgres://rinse-rss@db/rinse-rss
