@@ -75,18 +75,17 @@ def scrape_recurring_show(show_url):
     """
     logging.info('Initialising broadcast show information from URL {}'.format(show_url))
     show_slug = show_url.rsplit('/', 2)[-2]
-    logging.debug(show_slug)
+    logging.debug("show slug ← {}".format(show_slug))
     show_page = html(requests.get(show_url).content)
     try:
         base_xpath = '/html/body/div[@id="wrapper"]/div[@id="container"]/div[contains(@class, "rounded")]/div'
         show_name = show_page.xpath(base_xpath + '/div/h2//text()')[0]
+        logging.debug("show name ← {}".format(show_name))
         description = '\n\n'.join(show_page.xpath(base_xpath + '/div[contains(@class, "entry")]/p//text()'))
+        logging.debug("show description ← '{}'...".format(description[:30]))
     except IndexError:
         logging.error("IndexError creating show: likely XPath query error due to webpage misrendering/misloading")
         raise
-    logging.debug('Successfully extracted show name, description ({}, {}...) from {}'.format(show_name,
-                                                                                             description[10],
-                                                                                             show_url))
     show = RecurringShow(name=show_name, slug=recurring_show_slug(show_url), description=description, web_url=show_url)
     logging.debug('Successfully initialised %s' % show)
     return show
@@ -101,15 +100,18 @@ def scrape_individual_podcast(html_element):
     """
     logging.info('Initialising Podcast from HTML element')
     try:
-        broadcast_date = datetime.strptime(html_element.xpath('./@data-air_day')[0], '%Y-%m-%d')
-        broadcast_time = datetime.strptime(html_element.xpath('./@data-airtime')[0], '%H')
+        broadcast_date = datetime.strptime(html_element.xpath('.//div[contains(@class, "listen")]/a/@data-air-day')[0], '%Y-%m-%d')
+        logging.debug("podcast broadcast date ← {}".format(broadcast_date))
+        broadcast_time = datetime.strptime(html_element.xpath('.//div[contains(@class, "listen")]/a/@data-airtime')[0], '%H')
+        logging.debug("podcast broadcast time ← {}".format(broadcast_time))
         broadcast_datetime = datetime.combine(broadcast_date.date(), broadcast_time.time())
         title = " ".join(html_element.xpath(".//h3//text()")).strip()
+        logging.debug("podcast title ← {}".format(title))
         show_url = html_element.xpath(".//h3/a/@href")
+        logging.debug("podcast show url ← {}".format(show_url))
     except IndexError:
         logging.error("IndexError creating podcast: likely XPath query error due to webpage misrendering/misloading")
         raise
-    logging.debug("title <- %s" % title)
     try:
         show_slug = recurring_show_slug(show_url)
     except:
