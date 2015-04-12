@@ -18,12 +18,15 @@ Configuration is in `docker-compose.yml`.
 Deployment
 ----------
 
+0) ensure requirements are satisfied,
 1) check-out this repository,
 2) copy the Upstart service definition to the required folder,
 3) copy and link the Nginx reverse-proxy configuration,
 4) check it works:
 
 ```sh
+aptitude install docker.io python-pip nginx
+pip install docker-compose
 git clone https://github.com/jeffbr13/rinse-rss.git /opt/rinse-rss
 cp /opt/rinse-rss/upstart.conf /etc/init/rinse-rss.conf
 cp /opt/rinse-rss/nginx.conf /etc/nginx/sites-available/rinse-rss
