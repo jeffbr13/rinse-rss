@@ -20,11 +20,14 @@ Deployment
 
 1) check-out this repository,
 2) copy the Upstart service definition to the required folder,
-3) check it works:
+3) copy and link the Nginx reverse-proxy configuration,
+4) check it works:
 
 ```sh
 git clone https://github.com/jeffbr13/rinse-rss.git /opt/rinse-rss
 cp /opt/rinse-rss/upstart.conf /etc/init/rinse-rss.conf
+cp /opt/rinse-rss/nginx.conf /etc/nginx/sites-available/rinse-rss
+ln -s /etc/nginx/sites-available/rinse-rss /etc/nginx/sites-enabled/rinse-rss
 service rinse-rss start
 ```
 
