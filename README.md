@@ -18,30 +18,22 @@ Configuration is in `docker-compose.yml`.
 Deployment
 ----------
 
-### Remote Server
+### Initial Deployment
+
+Set up a git-remote on your production box, defining production hosts in a `hosts` file:
 
 ```sh
-add-apt-repository ppa:git-core/ppa                                     # install required software
-aptitude update
-aptitude install docker.io git nginx python-pip
-pip install docker-compose
-
-git clone https://github.com/jeffbr13/rinse-rss.git /opt/rinse-rss      # set up local repo for pushing
-git config --file /opt/rinse-rss/.git/config receive.denyCurrentBranch updateInstead
-cp /opt/rinse-rss/post-receive.githook /opt/rinse-rss/.git/post-receive
-chmod +x /opt/rinse-rss/.git/hooks/post-receive
-
-cp /opt/rinse-rss/upstart.conf /etc/init/rinse-rss.conf                 # set up service
-cp /opt/rinse-rss/nginx.conf /etc/nginx/sites-available/rinse-rss
-ln --force --symbolic /etc/nginx/sites-available/rinse-rss /etc/nginx/sites-enabled/rinse-rss
-service rinse-rss restart
+ansible-remote -i hosts production.yml
+git remote add production <SSH host>:/opt/rinse-rss
+git checkout master && git push production master
 ```
 
-### Local Host
+
+### Repeat Deployment
 
 ```sh
-git remote add production doctors:/opt/rinse-rss        # add git remote 
-git push production master                              # set remote tracking branch
+git checkout master
+git push production
 ```
 
 

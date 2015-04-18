@@ -61,3 +61,6 @@ data/db/
 
 # Celery beat schedule database
 celerybeat-schedule*
+
+# Ansible hosts file
+hosts
