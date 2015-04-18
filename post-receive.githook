@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+cp /opt/rinse-rss/nginx.conf /etc/nginx/sites-available/rinse-rss
+ln -s /etc/nginx/sites-available/rinse-rss /etc/nginx/sites-enabled/rinse-rss
+cp /opt/rinse-rss/upstart.conf /etc/init/rinse-rss.conf
+service rinse-rss restart

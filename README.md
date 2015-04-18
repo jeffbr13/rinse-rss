@@ -18,20 +18,28 @@ Configuration is in `docker-compose.yml`.
 Deployment
 ----------
 
-0) ensure requirements are satisfied,
-1) check-out this repository,
-2) copy the Upstart service definition to the required folder,
-3) copy and link the Nginx reverse-proxy configuration,
-4) check it works:
+### Remote Server
 
 ```sh
-aptitude install docker.io python-pip nginx
+aptitude install docker.io python-pip nginx                             # install required software
 pip install docker-compose
-git clone https://github.com/jeffbr13/rinse-rss.git /opt/rinse-rss
-cp /opt/rinse-rss/upstart.conf /etc/init/rinse-rss.conf
+
+git clone https://github.com/jeffbr13/rinse-rss.git /opt/rinse-rss      # set up local repo for pushing
+git config --file /opt/rinse-rss/.git/config receive.denyCurrentBranch updateInstead
+cp /opt/rinse-rss/post-receive.githook /opt/rinse-rss/.git/post-receive
+chmod +x /opt/rinse-rss/.git/hooks/post-receive
+
+cp /opt/rinse-rss/upstart.conf /etc/init/rinse-rss.conf                 # set up service
 cp /opt/rinse-rss/nginx.conf /etc/nginx/sites-available/rinse-rss
-ln -s /etc/nginx/sites-available/rinse-rss /etc/nginx/sites-enabled/rinse-rss
-service rinse-rss start
+ln --force --symbolic /etc/nginx/sites-available/rinse-rss /etc/nginx/sites-enabled/rinse-rss
+service rinse-rss restart
+```
+
+### Local Host
+
+```sh
+git remote add production doctors:/opt/rinse-rss        # add git remote 
+git push production master                              # set remote tracking branch
 ```
 
 
