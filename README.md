@@ -21,7 +21,9 @@ Deployment
 ### Remote Server
 
 ```sh
-aptitude install docker.io python-pip nginx                             # install required software
+add-apt-repository ppa:git-core/ppa                                     # install required software
+aptitude update
+aptitude install docker.io git nginx python-pip
 pip install docker-compose
 
 git clone https://github.com/jeffbr13/rinse-rss.git /opt/rinse-rss      # set up local repo for pushing

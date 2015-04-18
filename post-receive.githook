@@ -1,5 +1,13 @@
 #!/usr/bin/env sh
+
+echo "Configure Nginx reverse-proxy…"
 cp /opt/rinse-rss/nginx.conf /etc/nginx/sites-available/rinse-rss
-ln -s /etc/nginx/sites-available/rinse-rss /etc/nginx/sites-enabled/rinse-rss
+ln --force --symbolic /etc/nginx/sites-available/rinse-rss /etc/nginx/sites-enabled/rinse-rss
+
+echo "Configure and start Upstart service…"
 cp /opt/rinse-rss/upstart.conf /etc/init/rinse-rss.conf
 service rinse-rss restart
+
+echo "Copy latest post-receive Git hook into place…"
+cp /opt/rinse-rss/post-receive.githook /opt/rinse-rss/.git/hooks/post-receive
+chmod +x /opt/rinse-rss/.git/hooks/post-receive
