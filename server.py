@@ -5,7 +5,7 @@ import logging
 import os.path
 from os import environ
 
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, send_from_directory, make_response
 from flask.ext.migrate import Migrate, MigrateCommand
 from flask.ext.script import Manager
 from yaml import load as yaml_load
@@ -43,10 +43,14 @@ def index():
 
 @app.route('/podcasts')
 def full_feed():
-    return render_template('rss.xml',
-                           feed_url=('http://' + app.config['PODCASTS_FEED']['server_url'] + '/podcasts'),
-                           feed_configuration=app.config['PODCASTS_FEED'],
-                           podcasts=IndividualPodcast.query.all())
+    response = make_response(render_template('rss.xml',
+                                             feed_url=(app.config['PODCASTS_FEED']['server_url'] + '/podcasts'),
+                                             feed_configuration=app.config['PODCASTS_FEED'],
+                                             podcasts=sorted(IndividualPodcast.query.all(),
+                                                             key=(lambda x: x.broadcast_date),
+                                                             reverse=True)))
+    response.mimetype = "application/rss+xml"
+    return response
 
 
 @app.route('/show/<show_slug>.rss')
@@ -62,10 +66,15 @@ def recurring_show_feed(show_slug):
     if show.web_url:
         feed_configuration['url'] = show.web_url
 
-    return render_template('rss.xml',
-                           feed_url=('http://' + app.config['PODCASTS_FEED']['server_url'] + '/show/' + show_slug + '.rss'),
-                           feed_configuration=feed_configuration,
-                           podcasts=IndividualPodcast.query.filter_by(show_slug=show.slug))
+
+    response = make_response(render_template('rss.xml',
+                                             feed_url=(app.config['PODCASTS_FEED']['server_url'] + '/show/' + show_slug + '.rss'),
+                                             feed_configuration=feed_configuration,
+                                             podcasts=sorted(IndividualPodcast.query.filter_by(show_slug=show_slug),
+                                                             key=(lambda x: x.broadcast_date),
+                                                             reverse=True)))
+    response.mimetype = "application/rss+xml"
+    return response
 
 
 @app.route('/artwork')

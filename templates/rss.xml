@@ -20,7 +20,7 @@
         </itunes:owner>
 
         <itunes:image href="{{ feed_configuration.thumbnail_url }}"/>
-        <itunes:category text="{{ feed_configuration.category }}"></itunes:category>
+        <itunes:category text="{{ feed_configuration.category }}"/>
         <itunes:explicit>yes</itunes:explicit>
 
 
@@ -28,13 +28,15 @@
         <item>
            <title>{{ podcast.title | escape }}</title>
            <description>{{ podcast.show.description | escape }}</description>
-           <pubDate>{{ podcast.broadcast_date }}</pubDate>
+           <pubDate>{{ podcast.broadcast_date.strftime("%a, %d %b %Y %X %Z") }}</pubDate>
            <guid>{{ podcast.guid }}</guid>
 
            <itunes:summary>{{ podcast.show.description | escape}}</itunes:summary>
            <itunes:author>{{ podcast.show.name | escape}}</itunes:author>
 
-           <link>{{ podcast.show.web_url }}</link>
+	       {% if podcast.show %}
+	           <link>{{ podcast.show.web_url }}</link>
+	       {% endif %}
            <enclosure url="{{ podcast.enclosure_url }}" length="{{ podcast.enclosure_content_length }}" type="{{ podcast.enclosure_content_type }}"/>
         </item>
         {% endfor %}
