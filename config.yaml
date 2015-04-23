@@ -13,7 +13,7 @@ PODCASTS_FEED:
   category: Music     # http://www.apple.com/itunes/podcasts/specs.html#categories
 
   owner: Rinse FM
-  copyright: "&#xA9; Rinse FM 2014"
+  copyright: Rinse FM 2014
 
   language: en-gb
 
