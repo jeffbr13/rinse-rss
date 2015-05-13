@@ -13,7 +13,7 @@ from rinse import IndividualPodcast, RecurringShow, scrape_podcasts, scrape_show
 # configure logging
 logging.basicConfig(level=logging.DEBUG) if bool(environ.get('DEBUG')) else logging.basicConfig(level=logging.INFO)
 # load configuration
-with open('config.yaml') as f:
+with open('feed.yml') as f:
     podcasts_feed_config = yaml_load(f)["PODCASTS_FEED"]
 # connect to cache and database
 app = Celery('tasks', broker=("redis://" + environ.get("REDIS_PORT_6379_TCP_ADDR", "localhost")))

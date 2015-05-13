@@ -3,12 +3,12 @@
 """Server for rinse.benjeffrey.com"""
 import logging
 import os.path
+import yaml
 from os import environ
 
 from flask import Flask, render_template, send_from_directory, make_response
 from flask.ext.migrate import Migrate, MigrateCommand
 from flask.ext.script import Manager
-from yaml import load as yaml_load
 
 from rinse import db, IndividualPodcast, RecurringShow
 
@@ -19,8 +19,8 @@ logging.basicConfig(level=logging.DEBUG) if bool(environ.get('DEBUG', False)) el
 
 app = Flask(__name__)
 
-with open('config.yaml') as f:
-    app.config.update(yaml_load(f))
+with open("feed.yml") as f:
+    app.config.update(PODCASTS_FEED=yaml.load(f))
 
 app.config.update(
     DEBUG=bool(environ.get('DEBUG', False)),
