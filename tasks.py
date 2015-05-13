@@ -1,11 +1,11 @@
 import logging
+import yaml
 from datetime import timedelta
 from os import environ
 
 from celery import Celery
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from yaml import load as yaml_load
 
 from rinse import IndividualPodcast, RecurringShow, scrape_podcasts, scrape_shows, scrape_recurring_show
 
@@ -13,8 +13,8 @@ from rinse import IndividualPodcast, RecurringShow, scrape_podcasts, scrape_show
 # configure logging
 logging.basicConfig(level=logging.DEBUG) if bool(environ.get('DEBUG')) else logging.basicConfig(level=logging.INFO)
 # load configuration
-with open('config.yaml') as f:
-    podcasts_feed_config = yaml_load(f)["PODCASTS_FEED"]
+with open('feed.yml') as f:
+    podcasts_feed_config = yaml.load(f)
 # connect to cache and database
 app = Celery('tasks', broker=("redis://" + environ.get("REDIS_PORT_6379_TCP_ADDR", "localhost")))
 db_engine = create_engine(environ.get("SQLALCHEMY_DATABASE_URI", "sqlite://"))
