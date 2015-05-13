@@ -165,4 +165,3 @@ def scrape_shows(scrape_url):
             logging.error(e)
             pass
     return recurring_shows
-
