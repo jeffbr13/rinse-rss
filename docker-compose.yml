@@ -13,7 +13,7 @@ db:
 
 web:
   build: .              # build using default Dockerfile
-  command: python server.py run
+  command: python app.py run
   volumes:
     - .:/opt/rinse-rss  # mount current directory inside container
   links:

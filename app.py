@@ -55,7 +55,6 @@ def full_feed():
 
 @app.route('/show/<show_slug>.rss')
 def recurring_show_feed(show_slug):
-    #TODO: generate custom image for each show
     show = RecurringShow.query.filter_by(slug=show_slug).first_or_404()
 
     feed_configuration = app.config['PODCASTS_FEED'].copy()

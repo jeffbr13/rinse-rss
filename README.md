@@ -18,22 +18,8 @@ Configuration is in `docker-compose.yml`.
 Deployment
 ----------
 
-### Initial Deployment
-
-Set up a git-remote on your production box, defining production hosts in a `hosts` file:
-
 ```sh
 ansible-remote -i hosts production.yml
-git remote add production <SSH host>:/opt/rinse-rss
-git checkout master && git push production master
-```
-
-
-### Repeat Deployment
-
-```sh
-git checkout master
-git push production
 ```
 
 
@@ -45,7 +31,7 @@ Running Individual Components
 
 ```sh
 docker-compose up webserver     # to run the webserver in it's Docker container, or:
-python server.py run            # to run the webserver locally
+python app.py run               # to run the webserver locally
 ```
 
 ### Scrape Worker
@@ -54,7 +40,7 @@ python server.py run            # to run the webserver locally
 and update the database in the background every quarter-hour.
 
 ```sh
-docker-compose up worker    # run worker in Docker container
+docker-compose up worker                                    # run worker in Docker container
 
 celery worker --app=tasks --beat --loglevel=                # run foreground worker
 
@@ -76,6 +62,6 @@ Database Maintenance
 Database migrations are managed through [Flask-Migrate](https://flask-migrate.readthedocs.org).
 
 ```sh
-python server.py db migrate                         # to create a database migration
-docker-compose run web python server.py db upgrade  # to apply database migrations
+python app.py db migrate                            # to create a database migration
+docker-compose run web python app.py db upgrade     # to apply database migrations
 ```
