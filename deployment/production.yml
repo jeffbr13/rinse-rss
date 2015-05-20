@@ -5,8 +5,10 @@
     server_name: rinse.benjeffrey.net
   remote_user: root
   tasks:
+    - name: Docker repository key is installed
+      apt_key: id=36A1D7869245C8950F966E92D8576A8BA88D21E9 keyserver=p80.pool.sks-keyservers.net
     - name: Docker repository is available
-      apt_repository: repo="deb http://get.docker.io/ubuntu docker main" state=present
+      apt_repository: repo="deb https://get.docker.com/ubuntu docker main" state=present
 
     - name: Required packages are installed
       apt: name={{ item }} state=latest
