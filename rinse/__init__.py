@@ -149,7 +149,7 @@ def scrape_shows(scrape_url):
     """
     logging.info("Fetching shows data from {}".format(scrape_url))
     shows_page = html(requests.get(scrape_url).content)
-    hrefs = shows_page.xpath("//a[contains(@class, 'artist')]/@href")
+    hrefs = shows_page.xpath("//a[contains(@href, 'artist')]/@href")
     recurring_shows = []
     for href in hrefs:
         try:
