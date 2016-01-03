@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """HTTP server for Rinse podcast feed"""
 import os.path
-import yaml
 
 from flask import Flask, render_template, send_from_directory, make_response
 from flask.ext.migrate import Migrate, MigrateCommand
@@ -13,9 +12,6 @@ from rinse import db, IndividualPodcast, RecurringShow
 
 app = Flask(__name__)
 app.config.from_object('settings')
-
-with open("feed.yml") as f:
-    app.config.update(PODCASTS_FEED=yaml.load(f))
 
 db.init_app(app)
 migrate = Migrate(app, db)
@@ -34,10 +30,21 @@ def index():
 def full_feed():
     """RSS feed of all podcasts"""
     response = make_response(render_template('rss.xml',
-                                             feed_url=(app.config['PODCASTS_FEED']['server_url'] + '/podcasts'),
-                                             feed_configuration=app.config['PODCASTS_FEED'],
+                                             self_link=app.config['SERVER_NAME'] + '/podcasts',
+                                             web_link=app.config['RSS_URL'],
+                                             title=app.config['RSS_TITLE'],
+                                             subtitle=app.config['RSS_SUBTITLE'],
+                                             description=app.config['RSS_DESCRIPTION'],
+                                             keywords=app.config['RSS_KEYWORDS'],
+                                             language=app.config['RSS_LANGUAGE'],
+                                             owner=app.config['RSS_OWNER'],
+                                             copyright=app.config['RSS_COPYRIGHT'],
+                                             podcast_owner=app.config['RSS_PODCAST_OWNER'],
+                                             podcast_owner_email=app.config['RSS_PODCAST_OWNER_EMAIL'],
+                                             thumbnail_url=(app.config['SERVER_NAME'] + '/artwork'),
+                                             category=app.config['RSS_CATEGORY'],
                                              podcasts=sorted(IndividualPodcast.query.all(),
-                                                             key=(lambda x: x.broadcast_date),
+                                                             key=(lambda p: p.broadcast_date),
                                                              reverse=True)))
     response.mimetype = "application/rss+xml"
     return response
@@ -47,21 +54,22 @@ def full_feed():
 def recurring_show_feed(show_slug):
     """RSS feed of a single show"""
     show = RecurringShow.query.filter_by(slug=show_slug).first_or_404()
-
-    feed_configuration = app.config['PODCASTS_FEED'].copy()
-    feed_configuration["title"] = show.name + " on " + feed_configuration["title"]
-
-    if show.description:
-        feed_configuration['description'] = show.description
-    if show.web_url:
-        feed_configuration['url'] = show.web_url
-
-
     response = make_response(render_template('rss.xml',
-                                             feed_url=(app.config['PODCASTS_FEED']['server_url'] + '/show/' + show_slug + '.rss'),
-                                             feed_configuration=feed_configuration,
+                                             self_link=app.config['SERVER_NAME'] + '/show/' + show_slug + '.rss',
+                                             web_link=show.web_url,
+                                             title=(show.name + ' on ' + app.config['RSS_TITLE']),
+                                             subtitle=app.config['RSS_SUBTITLE'],
+                                             description=show.description,
+                                             keywords=app.config['RSS_KEYWORDS'],
+                                             language=app.config['RSS_LANGUAGE'],
+                                             owner=app.config['RSS_OWNER'],
+                                             copyright=app.config['RSS_COPYRIGHT'],
+                                             podcast_owner=app.config['RSS_PODCAST_OWNER'],
+                                             podcast_owner_email=app.config['RSS_PODCAST_OWNER_EMAIL'],
+                                             thumbnail_url=(app.config['SERVER_NAME'] + '/artwork'),
+                                             category=app.config['RSS_CATEGORY'],
                                              podcasts=sorted(IndividualPodcast.query.filter_by(show_slug=show_slug),
-                                                             key=(lambda x: x.broadcast_date),
+                                                             key=(lambda p: p.broadcast_date),
                                                              reverse=True)))
     response.mimetype = "application/rss+xml"
     return response

@@ -1,26 +1,26 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
     <channel>
-        <link>{{ feed_configuration.url }}</link>
-        <atom:link href="{{ feed_url }}" rel="self" type="application/rss+xml" />
+        <atom:link rel="self" type="application/rss+xml" href="{{ self_link }}" />
+        <link>{{ web_link }}</link>
 
-        <title>{{ feed_configuration.title }}</title>
-        <itunes:subtitle>{{ feed_configuration.subtitle }}</itunes:subtitle>
+        <title>{{ title }}</title>
+        <itunes:subtitle>{{ subtitle }}</itunes:subtitle>
 
-        <description>{{ feed_configuration.description }}</description>
-        <itunes:summary>{{ feed_configuration.description }}</itunes:summary>
-        <itunes:keywords>{{ feed_configuration.keywords }}</itunes:keywords>
-        <language>{{ feed_configuration.language }}</language>
+        <description>{{ description }}</description>
+        <itunes:summary>{{ description }}</itunes:summary>
+        <itunes:keywords>{{ keywords }}</itunes:keywords>
+        <language>{{ language }}</language>
 
-        <itunes:author>{{ feed_configuration.owner }}</itunes:author>
-        <copyright>{{ feed_configuration.copyright }}</copyright>
+        <itunes:author>{{ owner }}</itunes:author>
+        <copyright>{{ copyright }}</copyright>
 
         <itunes:owner>
-            <itunes:name>{{ feed_configuration.podcast_owner }}</itunes:name>
-            <itunes:email>{{ feed_configuration.podcast_owner_email }}</itunes:email>
+            <itunes:name>{{ podcast_owner }}</itunes:name>
+            <itunes:email>{{ podcast_owner_email }}</itunes:email>
         </itunes:owner>
 
-        <itunes:image href="{{ feed_configuration.thumbnail_url }}"/>
-        <itunes:category text="{{ feed_configuration.category }}"/>
+        <itunes:image href="{{ thumbnail_url }}"/>
+        <itunes:category text="{{ category }}"/>
         <itunes:explicit>yes</itunes:explicit>
 
 
