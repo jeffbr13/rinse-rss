@@ -20,18 +20,15 @@ manager.add_command("db", MigrateCommand)
 
 
 @app.route('/')
-def index():
-    """Index page of all podcast feeds.
-    """
+def serve_index_page():
     return render_template('index.html', shows=sorted(RecurringShow.query.all(), key=lambda x: x.slug))
 
 
 @app.route('/podcasts')
-def full_feed():
-    """RSS feed of all podcasts"""
+def serve_all_shows_feed():
     response = make_response(render_template('rss.xml',
                                              self_link=app.config['SERVER_NAME'] + '/podcasts',
-                                             web_link=app.config['RSS_URL'],
+                                             web_link=app.config['RSS_WEB_URL'],
                                              title=app.config['RSS_TITLE'],
                                              subtitle=app.config['RSS_SUBTITLE'],
                                              description=app.config['RSS_DESCRIPTION'],
@@ -51,8 +48,7 @@ def full_feed():
 
 
 @app.route('/show/<show_slug>.rss')
-def recurring_show_feed(show_slug):
-    """RSS feed of a single show"""
+def serve_single_show_feed(show_slug):
     show = RecurringShow.query.filter_by(slug=show_slug).first_or_404()
     response = make_response(render_template('rss.xml',
                                              self_link=app.config['SERVER_NAME'] + '/show/' + show_slug + '.rss',
@@ -76,7 +72,7 @@ def recurring_show_feed(show_slug):
 
 
 @app.route('/artwork')
-def podcast_artwork():
+def serve_podcast_artwork():
     """
     Serve PNG logo image as Rinse's website logo is SVG.
     """
@@ -85,7 +81,7 @@ def podcast_artwork():
 
 
 @app.route('/favicon.ico')
-def favicon():
+def serve_favicon():
     """
     Serve ICO favicon logo.
     """
