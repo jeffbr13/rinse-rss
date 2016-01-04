@@ -28,6 +28,6 @@ RSS_LANGUAGE = "en-gb"
 RSS_PODCAST_OWNER = "Ben Jeffrey"
 RSS_PODCAST_OWNER_EMAIL = "mail@benjeffrey.net"
 
-RSS_PODCAST_SCRAPE_URL = "http://rinse.fm/podcasts/"
+RSS_PODCAST_EPISODE_SCRAPE_URL = "http://rinse.fm/podcasts/"
 RSS_SHOW_SCRAPE_URL = "http://rinse.fm/family/"
 RSS_WEB_URL = "http://rinse.fm/podcasts/"
