@@ -7,8 +7,8 @@ from flask import Flask, render_template, send_from_directory, make_response
 from flask.ext.migrate import Migrate, MigrateCommand
 from flask.ext.script import Manager
 
-from rinse import db, IndividualPodcast, RecurringShow
-
+from rinse import db, Show
+from rinse.models import PodcastEpisode, Show
 
 app = Flask(__name__)
 app.config.from_object('settings')
@@ -21,7 +21,7 @@ manager.add_command("db", MigrateCommand)
 
 @app.route('/')
 def serve_index_page():
-    return render_template('index.html', shows=sorted(RecurringShow.query.all(), key=lambda x: x.slug))
+    return render_template('index.html', shows=sorted(Show.query.all(), key=lambda x: x.slug))
 
 
 @app.route('/podcasts')
@@ -40,7 +40,7 @@ def serve_all_shows_feed():
                                              podcast_owner_email=app.config['RSS_PODCAST_OWNER_EMAIL'],
                                              thumbnail_url=(app.config['SERVER_NAME'] + '/artwork'),
                                              category=app.config['RSS_CATEGORY'],
-                                             podcasts=sorted(IndividualPodcast.query.all(),
+                                             podcasts=sorted(PodcastEpisode.query.all(),
                                                              key=(lambda p: p.broadcast_date),
                                                              reverse=True)))
     response.mimetype = "application/rss+xml"
@@ -49,7 +49,7 @@ def serve_all_shows_feed():
 
 @app.route('/show/<show_slug>.rss')
 def serve_single_show_feed(show_slug):
-    show = RecurringShow.query.filter_by(slug=show_slug).first_or_404()
+    show = Show.query.filter_by(slug=show_slug).first_or_404()
     response = make_response(render_template('rss.xml',
                                              self_link=app.config['SERVER_NAME'] + '/show/' + show_slug + '.rss',
                                              web_link=show.web_url,
@@ -64,7 +64,7 @@ def serve_single_show_feed(show_slug):
                                              podcast_owner_email=app.config['RSS_PODCAST_OWNER_EMAIL'],
                                              thumbnail_url=(app.config['SERVER_NAME'] + '/artwork'),
                                              category=app.config['RSS_CATEGORY'],
-                                             podcasts=sorted(IndividualPodcast.query.filter_by(show_slug=show_slug),
+                                             podcasts=sorted(PodcastEpisode.query.filter_by(show_slug=show_slug),
                                                              key=(lambda p: p.broadcast_date),
                                                              reverse=True)))
     response.mimetype = "application/rss+xml"

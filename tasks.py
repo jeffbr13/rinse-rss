@@ -7,8 +7,7 @@ from celery import Celery
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from rinse import IndividualPodcast, RecurringShow, scrape_podcasts, scrape_shows, scrape_recurring_show
-
+from rinse import Show, scrape_podcast_episodes, scrape_shows
 
 # configure logging
 logging.basicConfig(level=logging.DEBUG) if bool(environ.get('DEBUG')) else logging.basicConfig(level=logging.INFO)
@@ -37,12 +36,12 @@ def refresh_data():
     for show in scrape_shows(podcasts_feed_config["show_scrape_url"]):
         logging.info("Merging %s into database…" % show)
         db_session.merge(show)
-    for podcast in scrape_podcasts(podcasts_feed_config['podcast_scrape_url']):
+    for podcast in scrape_podcast_episodes(podcasts_feed_config['podcast_scrape_url']):
         logging.info("Merging %s into database…" % podcast)
-        if podcast.show_slug and not db_session.query(RecurringShow).get(podcast.show_slug):
+        if podcast.show_slug and not db_session.query(Show).get(podcast.show_slug):
             logging.info("Show for %s doesn't exist in database, scraping from website…" % podcast)
             try:
-                show = scrape_recurring_show('http://rinse.fm/artists/{}/'.format(podcast.show_slug))
+                show = Show('http://rinse.fm/artists/{}/'.format(podcast.show_slug))
                 logging.info("Merging {} into database for {}".format(show, podcast))
                 db_session.merge(show)
             except Exception as e:
