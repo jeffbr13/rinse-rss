@@ -6,8 +6,7 @@ SERVER_NAME = env.get('SERVER_NAME', '127.0.0.1:5000')
 SQLALCHEMY_DATABASE_URI = env.get('SQLALCHEMY_DATABASE_URI', 'sqlite:////tmp/rinse-rss.sqlite')
 
 
-# podcast feed template variables
-
+# Template Variables
 RSS_TITLE = "Rinse FM"
 RSS_SUBTITLE = "London's favorite pirate radio station."
 RSS_DESCRIPTION = """

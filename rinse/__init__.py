@@ -66,10 +66,10 @@ class ScrapeCommand(Command):
                 logging.info("Show for %s doesn't exist in database, scraping from website…" % podcast)
                 try:
                     show = Show('http://rinse.fm/artists/{}/'.format(podcast.show_slug))
-                    logging.info("Merging {} into database for {}".format(show, podcast))
+                    logging.info("Merging {} into database for {}", show, podcast)
                     session.merge(show)
                     session.merge(podcast)
-                except Exception as e:
-                    logging.warning("Skipping podcast {}, couldn't create show".format(podcast), e)
+                except Exception:
+                    logging.warning("Skipping podcast {}, couldn't create show", podcast, exc_info=True)
 
         session.commit()
