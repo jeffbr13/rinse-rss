@@ -2,7 +2,8 @@ from datetime import datetime
 import logging
 
 from flask.ext.sqlalchemy import SQLAlchemy
-from lxml.html import fromstring as html
+from furl import furl
+from lxml.html import fromstring as html, HtmlElement
 import requests
 
 
@@ -22,7 +23,7 @@ class PodcastEpisode(db.Model):
     show_slug = db.Column(db.String(200), db.ForeignKey("show.slug"), nullable=True)
 
     def __init__(self,
-                 html_element=None,
+                 html_element: HtmlElement =None,
                  title=None,
                  broadcast_datetime=None,
                  enclosure_url=None,
@@ -32,11 +33,9 @@ class PodcastEpisode(db.Model):
         """
         Scrape PodcastEpisode information from html_element if given,
         otherwise use passed-through values.
-
-        :type html_element: lxml.html.HtmlElement
         """
         if html_element:
-            logging.info('initialising Podcast from HTML element')
+            logging.info('Parsing PodcastEpisode from HTML element.')
             try:
                 broadcast_date = datetime.strptime(
                         html_element.xpath('.//div[contains(@class, "listen")]/a/@data-air-day')[0],
@@ -47,17 +46,23 @@ class PodcastEpisode(db.Model):
                 broadcast_datetime = datetime.combine(broadcast_date.date(), broadcast_time.time())
                 title = " ".join(html_element.xpath(".//h3//text()")).strip()
                 show_url = html_element.xpath(".//h3/a/@href")
-            except IndexError as e:
-                logging.error("likely XPath query error due to webpage misrendering/misloading", exc_info=True)
+                if isinstance(show_url, list):
+                    # in case the XPath returned multiple "href"s
+                    show_url = show_url[0]
+
+            except IndexError:
+                logging.warning("PodcastEpisode parsing failed.", exc_info=True)
                 raise
 
-            show_slug = Show.parse_slug(show_url) if show_url else None
+            show_slug = Show.parse_slug(furl(show_url)) if show_url else None
 
             # Get accurate download information for the RSS Enclosure
             enclosure_url = html_element.xpath('./div/div[@class="download icon"]/a/@href')[0].strip()
             download_headers = http_session.head(enclosure_url).headers
             enclosure_content_length = download_headers.get('content-length')
             enclosure_content_type = download_headers.get('content-type')
+
+            logging.info('PodcastEpisode parsed.')
 
         self.guid = enclosure_url
         self.title = title
@@ -79,27 +84,23 @@ class Show(db.Model):
     podcasts = db.relationship("PodcastEpisode", backref=db.backref("show"))
 
     @staticmethod
-    def parse_slug(web_url):
-        """Split unique Show slug from URL"""
-        try:
-            return web_url.rsplit('/', 2)[-2]
-        except AttributeError:
-            logging.warning('retrying slug split in the case that XPath returned a list')
-            return Show.parse_slug(web_url[0])
+    def parse_slug(url: furl):
+        """Get the unique slug from a Show's URL"""
+        return url.path.segments[-2]
 
     def __init__(self, url, slug=None, name=None, description=None):
         if not (slug and name and description):
-            logging.info('scraping Show from URL {}'.format(url))
-            slug = Show.parse_slug(url)
+            logging.info('Scraping Show from <%s>', url)
+            slug = Show.parse_slug(furl(url))
             show_page = html(http_session.get(url).content)
             try:
                 base_xpath = '/html/body/div[@id="wrapper"]/div[@id="container"]/div[contains(@class, "rounded")]/div'
                 name = show_page.xpath(base_xpath + '/div/h2//text()')[0]
                 description = '\n\n'.join(show_page.xpath(base_xpath + '/div[contains(@class, "entry")]/p//text()'))
             except IndexError:
-                logging.error("likely XPath query error due to webpage misloading/misrendering", exc_info=True)
+                logging.error("Failed scraping Show name on show page <%s>.", url, exc_info=True)
                 raise
-            logging.info('successfully scraped Show from %s' % url)
+            logging.info('Show scraped from <%s>' % url)
 
         self.slug = slug
         self.name = name

@@ -12,6 +12,7 @@ alembic==0.7.5.post2
 anyjson==0.3.3
 billiard==3.3.0.19
 decorator==3.4.2
+furl==0.4.9
 itsdangerous==0.24
 kombu==3.0.24
 lxml==3.3.5
