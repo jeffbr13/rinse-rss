@@ -1,12 +1,11 @@
 #!python3
 import logging
 
-import requests
 from flask.ext.script import Command
 from lxml.html import fromstring as html
 from sqlalchemy.orm import sessionmaker
 
-from rinse.models import db, PodcastEpisode, Show
+from rinse.models import db, PodcastEpisode, Show, http_session
 from settings import RSS_PODCAST_EPISODE_SCRAPE_URL
 from settings import RSS_SHOW_SCRAPE_URL
 
@@ -19,7 +18,7 @@ def scrape_podcast_episodes(scrape_url):
     :rtype: [PodcastEpisode]
     """
     logging.info("Fetching podcast data from {0}".format(scrape_url))
-    podcasts_page = html(requests.get(scrape_url).content)
+    podcasts_page = html(http_session.get(scrape_url).content)
     # TODO: scrape more than the front page
     episodes = []
     for div in podcasts_page.xpath('//div[contains(@class, "podcast-list-item")]'):
@@ -37,14 +36,14 @@ def scrape_shows(scrape_url):
     :rtype: [Show]
     """
     logging.info("Fetching shows data from {}".format(scrape_url))
-    shows_page = html(requests.get(scrape_url).content)
+    shows_page = html(http_session.get(scrape_url).content)
     hrefs = shows_page.xpath("//a[contains(@href, 'artist')]/@href")
     recurring_shows = []
     for href in hrefs:
         try:
             recurring_shows.append(Show(href))
-        except Exception as e:
-            logging.error(e)
+        except Exception:
+            logging.error('Could not parse Show from %s', href, exc_info=True)
             pass
     return recurring_shows
 

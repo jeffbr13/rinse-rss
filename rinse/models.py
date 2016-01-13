@@ -6,6 +6,9 @@ from lxml.html import fromstring as html
 import requests
 
 
+http_session = requests.Session()
+http_session.headers.update({'User-Agent': 'Mozilla/5.0'})
+
 db = SQLAlchemy()
 
 
@@ -33,7 +36,7 @@ class PodcastEpisode(db.Model):
         :type html_element: lxml.html.HtmlElement
         """
         if html_element:
-            logging.info('Initialising Podcast from HTML element')
+            logging.info('initialising Podcast from HTML element')
             try:
                 broadcast_date = datetime.strptime(
                         html_element.xpath('.//div[contains(@class, "listen")]/a/@data-air-day')[0],
@@ -45,17 +48,14 @@ class PodcastEpisode(db.Model):
                 title = " ".join(html_element.xpath(".//h3//text()")).strip()
                 show_url = html_element.xpath(".//h3/a/@href")
             except IndexError as e:
-                logging.error("likely XPath query error due to webpage misrendering/misloading", e)
+                logging.error("likely XPath query error due to webpage misrendering/misloading", exc_info=True)
                 raise
-            try:
-                show_slug = Show.parse_slug(show_url)
-            except Exception as e:
-                logging.info('Could not parse show slug', e)
-                show_slug = None
+
+            show_slug = Show.parse_slug(show_url) if show_url else None
 
             # Get accurate download information for the RSS Enclosure
             enclosure_url = html_element.xpath('./div/div[@class="download icon"]/a/@href')[0].strip()
-            download_headers = requests.head(enclosure_url).headers
+            download_headers = http_session.head(enclosure_url).headers
             enclosure_content_length = download_headers.get('content-length')
             enclosure_content_type = download_headers.get('content-type')
 
@@ -87,24 +87,24 @@ class Show(db.Model):
             logging.debug('retrying slug split in the case that XPath returned a list', e)
             return Show.parse_slug(web_url[0])
 
-    def __init__(self, web_url, slug=None, name=None, description=None):
+    def __init__(self, url, slug=None, name=None, description=None):
         if not (slug and name and description):
-            logging.info('Scraping Show from URL {}'.format(web_url))
-            slug = Show.parse_slug(web_url)
-            show_page = html(requests.get(web_url).content)
+            logging.info('scraping Show from URL {}'.format(url))
+            slug = Show.parse_slug(url)
+            show_page = html(http_session.get(url).content)
             try:
                 base_xpath = '/html/body/div[@id="wrapper"]/div[@id="container"]/div[contains(@class, "rounded")]/div'
                 name = show_page.xpath(base_xpath + '/div/h2//text()')[0]
                 description = '\n\n'.join(show_page.xpath(base_xpath + '/div[contains(@class, "entry")]/p//text()'))
-            except IndexError as e:
-                logging.error("likely XPath query error due to webpage misloading/misrendering", e)
+            except IndexError:
+                logging.error("likely XPath query error due to webpage misloading/misrendering", exc_info=True)
                 raise
-            logging.info('Successfully scraped Show from %s' % web_url)
+            logging.info('successfully scraped Show from %s' % url)
 
         self.slug = slug
         self.name = name
         self.description = description
-        self.web_url = web_url
+        self.web_url = url
 
     def __repr__(self):
         return "<Show: %s>" % self.slug
