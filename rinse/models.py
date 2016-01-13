@@ -83,8 +83,8 @@ class Show(db.Model):
         """Split unique Show slug from URL"""
         try:
             return web_url.rsplit('/', 2)[-2]
-        except AttributeError as e:
-            logging.debug('retrying slug split in the case that XPath returned a list', e)
+        except AttributeError:
+            logging.warning('retrying slug split in the case that XPath returned a list')
             return Show.parse_slug(web_url[0])
 
     def __init__(self, url, slug=None, name=None, description=None):
