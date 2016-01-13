@@ -8,9 +8,12 @@ from flask import Flask, render_template, send_from_directory, make_response
 from flask.ext.migrate import Migrate, MigrateCommand
 from flask.ext.script import Manager
 
+import settings
 from rinse import db, Show, scrape_shows, scrape_podcast_episodes, ScrapeCommand
 from rinse.models import PodcastEpisode, Show
 from settings import RSS_SHOW_SCRAPE_URL, RSS_PODCAST_EPISODE_SCRAPE_URL
+
+logging.basicConfig(level=logging.DEBUG if settings.DEBUG else logging.INFO)
 
 app = Flask(__name__)
 app.config.from_object('settings')
