@@ -9,32 +9,22 @@ db:
   volumes_from:
     - dbdata
   environment:
-    - POSTGRES_USER=rinse-rss
+    POSTGRES_USER: rinse-rss
 
 web:
-  build: .              # build using default Dockerfile
-  command: python app.py run
-  volumes:
-    - .:/opt/rinse-rss  # mount current directory inside container
+  build: .
   links:
     - db
   environment:
-    - SQLALCHEMY_DATABASE_URI=postgres://rinse-rss@db/rinse-rss
+    SQLALCHEMY_DATABASE_URI: "postgres://rinse-rss@db/rinse-rss"
   ports:
     - "5000:5000"
+  command: python manage.py runserver
 
-
-redis:
-  image: redis
-
-worker:
+scrape:
   build: .
-  command: celery worker --app=tasks --beat --loglevel=info
-  volumes:
-    - .:/opt/rinse-rss
   links:
-    - redis
     - db
   environment:
-    - C_FORCE_ROOT=TRUE
-    - SQLALCHEMY_DATABASE_URI=postgres://rinse-rss@db/rinse-rss
+    SQLALCHEMY_DATABASE_URI: "postgres://rinse-rss@db/rinse-rss"
+  command: /bin/bash -c "while sleep 300; do python manage.py scrape; done"
