@@ -1,5 +1,6 @@
 #!python3
 import logging
+from typing import AbstractSet
 
 from flask.ext.script import Command
 from lxml.html import fromstring as html
@@ -10,12 +11,10 @@ from settings import RSS_PODCAST_EPISODE_SCRAPE_URL
 from settings import RSS_SHOW_SCRAPE_URL
 
 
-def scrape_podcast_episodes(scrape_url):
+def scrape_podcast_episodes(scrape_url: str) -> AbstractSet[PodcastEpisode]:
     """
     :param scrape_url: URL of webpage to scrape for IndividualPodcasts
     :return: a collection of scraped Podcasts
-
-    :rtype: [PodcastEpisode]
     """
     logging.info("Fetching podcast data from {0}".format(scrape_url))
     podcasts_page = html(http_session.get(scrape_url).content)
@@ -29,11 +28,10 @@ def scrape_podcast_episodes(scrape_url):
     return episodes
 
 
-def scrape_shows(scrape_url):
+def scrape_shows(scrape_url: str) -> AbstractSet[Show]:
     """
     :param scrape_url: URL of webpage to scrape for RecurringShows
     :return: a collection of RecurringShows
-    :rtype: [Show]
     """
     logging.info("Fetching shows data from {}".format(scrape_url))
     shows_page = html(http_session.get(scrape_url).content)
@@ -44,7 +42,6 @@ def scrape_shows(scrape_url):
             recurring_shows.append(Show(href))
         except Exception:
             logging.error('Could not parse Show from %s', href, exc_info=True)
-            pass
     return recurring_shows
 
 
@@ -65,10 +62,10 @@ class ScrapeCommand(Command):
                 logging.info("Show for %s doesn't exist in database, scraping from website…" % podcast)
                 try:
                     show = Show('http://rinse.fm/artists/{}/'.format(podcast.show_slug))
-                    logging.info("Merging {} into database for {}", show, podcast)
+                    logging.info("Merging {} into database for {}.", show, podcast)
                     session.merge(show)
                     session.merge(podcast)
                 except Exception:
-                    logging.warning("Skipping podcast {}, couldn't create show", podcast, exc_info=True)
+                    logging.warning("Skipping podcast {}, couldn't create show.", podcast, exc_info=True)
 
         session.commit()

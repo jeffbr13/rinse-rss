@@ -35,7 +35,7 @@ class PodcastEpisode(db.Model):
         otherwise use passed-through values.
         """
         if html_element:
-            logging.info('Parsing PodcastEpisode from HTML element.')
+            logging.info('Parsing PodcastEpisode from HTML element…')
             try:
                 enclosure_url = html_element.xpath('./div/div[@class="download icon"]/a/@href')[0].strip()
 
@@ -48,7 +48,7 @@ class PodcastEpisode(db.Model):
                 broadcast_datetime = datetime.combine(broadcast_date.date(), broadcast_time.time())
                 title = " ".join(html_element.xpath(".//h3//text()")).strip()
             except IndexError:
-                logging.warning("PodcastEpisode parsing failed.", exc_info=True)
+                logging.warning("Failed parsing PodcastEpisode.", exc_info=True)
                 raise
 
             try:
@@ -58,14 +58,14 @@ class PodcastEpisode(db.Model):
                     show_url = show_url[0]
                 show_slug = Show.parse_slug(furl(show_url)) if show_url else None
             except IndexError:
-                logging.info("Could not find Show URL for PodcastEpisode \"%s.\"", enclosure_content_type)
+                logging.info("Could not find Show URL for PodcastEpisode <%s>.", enclosure_url)
 
             # Get accurate download information for the RSS Enclosure
             download_headers = http_session.head(enclosure_url).headers
             enclosure_content_length = download_headers.get('content-length')
             enclosure_content_type = download_headers.get('content-type')
 
-            logging.info('PodcastEpisode "%s" parsed.', enclosure_url)
+            logging.info('Scraped PodcastEpisode <%s>.', enclosure_url)
 
         self.guid = enclosure_url
         self.title = title
@@ -93,7 +93,7 @@ class Show(db.Model):
 
     def __init__(self, url, slug=None, name=None, description=None):
         if not (slug and name and description):
-            logging.info('Scraping Show from <%s>', url)
+            logging.info('Scraping Show from <%s>…', url)
             slug = Show.parse_slug(furl(url))
             show_page = html(http_session.get(url).content)
             try:
@@ -103,7 +103,7 @@ class Show(db.Model):
             except IndexError:
                 logging.error("Failed scraping Show name on show page <%s>.", url, exc_info=True)
                 raise
-            logging.info('Show scraped from <%s>' % url)
+            logging.info('Scrape Show from <%s>.' % url)
 
         self.slug = slug
         self.name = name
