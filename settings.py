@@ -2,7 +2,6 @@
 from os import environ as env
 
 DEBUG = bool(env.get('DEBUG', False))
-SERVER_NAME = env.get('SERVER_NAME', '127.0.0.1:5000')
 SQLALCHEMY_DATABASE_URI = env.get('SQLALCHEMY_DATABASE_URI', 'sqlite:////tmp/rinse-rss.sqlite')
 
 
