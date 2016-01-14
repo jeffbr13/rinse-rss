@@ -37,6 +37,8 @@ class PodcastEpisode(db.Model):
         if html_element:
             logging.info('Parsing PodcastEpisode from HTML element.')
             try:
+                enclosure_url = html_element.xpath('./div/div[@class="download icon"]/a/@href')[0].strip()
+
                 broadcast_date = datetime.strptime(
                         html_element.xpath('.//div[contains(@class, "listen")]/a/@data-air-day')[0],
                         '%Y-%m-%d')
@@ -45,24 +47,25 @@ class PodcastEpisode(db.Model):
                         '%H')
                 broadcast_datetime = datetime.combine(broadcast_date.date(), broadcast_time.time())
                 title = " ".join(html_element.xpath(".//h3//text()")).strip()
-                show_url = html_element.xpath(".//h3/a/@href")
-                if isinstance(show_url, list):
-                    # in case the XPath returned multiple "href"s
-                    show_url = show_url[0]
-
             except IndexError:
                 logging.warning("PodcastEpisode parsing failed.", exc_info=True)
                 raise
 
-            show_slug = Show.parse_slug(furl(show_url)) if show_url else None
+            try:
+                show_url = html_element.xpath(".//h3/a/@href")
+                if isinstance(show_url, list):
+                    # in case the XPath returned multiple "href"s
+                    show_url = show_url[0]
+                show_slug = Show.parse_slug(furl(show_url)) if show_url else None
+            except IndexError:
+                logging.info("Could not find Show URL for PodcastEpisode \"%s.\"", enclosure_content_type)
 
             # Get accurate download information for the RSS Enclosure
-            enclosure_url = html_element.xpath('./div/div[@class="download icon"]/a/@href')[0].strip()
             download_headers = http_session.head(enclosure_url).headers
             enclosure_content_length = download_headers.get('content-length')
             enclosure_content_type = download_headers.get('content-type')
 
-            logging.info('PodcastEpisode parsed.')
+            logging.info('PodcastEpisode "%s" parsed.', enclosure_url)
 
         self.guid = enclosure_url
         self.title = title
