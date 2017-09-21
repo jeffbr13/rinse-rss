@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Rinse FM unofficial podcast feed</title>
+
+	<meta charset="utf-8">
+
+	<link rel="alternate" type="application/rss+xml" href="{% url 'rss' %}" />
+    {% load static %}
+	<link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+
+	<!-- https://github.com/KeenRivals/bestmotherfucking.website -->
+	<style>
+		body {
+			margin: 1em auto;
+			max-width: 40em;
+			padding: 0 .62em;
+			font: 1.2em/1.62 sans-serif;
+		}
+
+		h1, h2, h3 {
+			line-height: 1.2;
+		}
+
+		@media print {
+			body {
+				max-width: none
+			}
+		}
+	</style>
+</head>
+<body>
+    <header>
+        <h1><a href="http://rinse.fm/"><img src="{% static 'artwork.png' %}" alt="Rinse FM" width="100" /></a><br/> <a href="/">unofficial podcast feed</a></h1>
+    </header>
+
+
+    <main>
+        <p><a href="http://rinse.fm/">Rinse FM</a> don't provide a way to subscribe to their freely-downloadable show podcasts outside of Soundcloud (<a href="https://www.magneticmag.com/2017/07/rinse-fms-soundcloud-account-taken-down-reinstated-again/">hmmmm</a>) so here's an RSS feed for your favourite podcasts app:</p>
+
+        <a rel="alternate" type="application/rss+xml" href="{% url 'rss' %}">Subscribe to Rinse FM podcasts</a>
+
+        <p>Per-show feeds have been removed as Rinse FM no longer track them on their own website. 😭</p>
+    </main>
+
+    <hr>
+
+    <footer class="row">
+        <p>🏴‍☠️ product 🛠 by <a href="http://jeffbr13.net">Ben Jeffrey</a>. Inspired by <a href="https://levels.io/rinse-fm-podcast/">@levelsio's Rinse FM podcast feed</a>.</p>
+        <p><a href="https://github.com/jeffbr13/rinse-rss">Source code</a> available under the <a href="https://www.mozilla.org/MPL/2.0/">MPL 2.0</a>.</p>
+    </footer>
+</body>
+</html>

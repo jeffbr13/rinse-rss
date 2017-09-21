@@ -64,3 +64,6 @@ celerybeat-schedule*
 
 # Ansible hosts file
 hosts
+
+# collected static files
+collected/
