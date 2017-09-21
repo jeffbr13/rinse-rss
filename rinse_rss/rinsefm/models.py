@@ -9,5 +9,8 @@ class PodcastEpisode(models.Model):
     audio_content_length = models.PositiveIntegerField()
     audio_content_type = models.CharField(max_length=200)
 
+    class Meta:
+        ordering = ('-broadcast_date',)
+
     def __str__(self):
         return '%s (%s)' % (self.title, self.broadcast_date)
