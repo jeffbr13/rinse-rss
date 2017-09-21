@@ -48,6 +48,8 @@ DJANGO_APPS = (
 )
 
 THIRD_PARTY_APPS = (
+    'django_extensions',
+    'huey.contrib.djhuey',
 )
 
 LOCAL_APPS = (
@@ -93,6 +95,16 @@ WSGI_APPLICATION = 'rinse_rss.wsgi.application'
 
 DATABASES = {
     'default': env.db(),
+}
+
+
+# Huey task queue
+# http://huey.readthedocs.io/en/latest/django.html
+HUEY = {
+    'always_eager': False,
+    'connection': {
+        'url': env.str('REDIS_URL', 'redis://localhost:6379/?db=1'),
+    },
 }
 
 
