@@ -2,6 +2,7 @@ from django.db import models
 
 
 class PodcastEpisode(models.Model):
+    slug = models.SlugField(unique=True)
     title = models.CharField(max_length=200)
     broadcast_date = models.DateTimeField()
     audio_url = models.URLField(unique=True)
