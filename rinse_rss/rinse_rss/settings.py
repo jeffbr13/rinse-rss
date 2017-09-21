@@ -10,7 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
+import logging
 import os
+import sys
 
 import environ
 
@@ -91,6 +93,34 @@ WSGI_APPLICATION = 'rinse_rss.wsgi.application'
 
 DATABASES = {
     'default': env.db(),
+}
+
+
+# LOGGING CONFIGURATION
+default_app_logger = {
+    'handlers': ['console'],
+    'level': logging.DEBUG if DEBUG else logging.INFO,
+    'propagate': False
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[%(levelname)s] %(message)s'
+        },
+    },
+    'handlers': {
+        # default log handler prints to console at debug level
+        'console': {
+            'level': logging.DEBUG if DEBUG else logging.INFO,
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {app: default_app_logger for app in LOCAL_APPS},
 }
 
 
