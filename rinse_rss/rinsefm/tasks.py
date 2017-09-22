@@ -31,6 +31,7 @@ def scrape_podcast_page(page=1):
             audio_url = div.xpath('.//a[contains(@href, "http://podcast.dgen.net/rinsefm/podcast/")]/@href')[0].strip()
             audio_response = http_session.head(audio_url)
             audio_response.raise_for_status()
+            assert 'audio/' in audio_response.headers['Content-Type']
             logger.info('Updating/creating podcast…')
             episode, created = PodcastEpisode.objects.update_or_create(
                 slug=slug,
