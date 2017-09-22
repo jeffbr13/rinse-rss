@@ -40,7 +40,7 @@
         {% for podcast in podcasts %}
         <item>
            <title>{{ podcast.title | escape }}</title>
-           <pubDate>{{ podcast.broadcast_date|date:"%r" }}</pubDate>
+           <pubDate>{{ podcast.broadcast_date|date:"r" }}</pubDate>
            <guid>{{ podcast.slug }}</guid>
 
            <itunes:author>{{ podcast.title | escape}}</itunes:author>
