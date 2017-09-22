@@ -1,7 +1,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
     <channel>
-        <atom:link rel="self" type="application/rss+xml" href="{% url 'rss' %}" />
-        <atom:link rel="alternate" type="text/html" href="{% url 'index' %}" />
+        <atom:link rel="self" type="application/rss+xml" href="{{ scheme }}://{{ hostname }}{% url 'rss' %}" />
+        <atom:link rel="alternate" type="text/html" href="{{ scheme }}://{{ hostname }}{% url 'index' %}" />
         <link>http://rinse.fm/podcasts/</link>
         <language>en-gb</language>
 
@@ -34,14 +34,14 @@
         </itunes:owner>
 
         {% load static %}
-        <itunes:image href="{% static 'artwork.png' %}"/>
+        <itunes:image href="{{ scheme }}://{{ hostname }}{% static 'artwork.png' %}"/>
 
 
         {% for podcast in podcasts %}
         <item>
            <title>{{ podcast.title | escape }}</title>
            <pubDate>{{ podcast.broadcast_date|date:"r" }}</pubDate>
-           <guid>{{ podcast.slug }}</guid>
+           <guid>{{ scheme }}://{{ hostname }}/podcast-episodes/{{ podcast.slug }}</guid>
 
            <itunes:author>{{ podcast.title | escape}}</itunes:author>
 

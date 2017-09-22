@@ -13,6 +13,8 @@ def podcast_feed(request: HttpRequest):
         request,
         'rss.xml',
         context=dict(
-            podcasts=PodcastEpisode.objects.all()
+            scheme=request._get_scheme(),
+            hostname=request.get_host(),
+            podcasts=PodcastEpisode.objects.all(),
         )
     )
