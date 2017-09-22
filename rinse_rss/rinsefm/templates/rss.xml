@@ -45,7 +45,7 @@
 
            <itunes:author>{{ podcast.title | escape}}</itunes:author>
 
-           <enclosure url="{{ podcast.audio_url }}" length="{{ podcast.audio_content_length }}" type="{{ podcast.audio_content_type }}"/>
+           <enclosure url="{{ podcast.audio_url|iriencode }}" length="{{ podcast.audio_content_length }}" type="{{ podcast.audio_content_type|escape }}"/>
         </item>
         {% endfor %}
 
