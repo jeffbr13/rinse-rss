@@ -49,5 +49,5 @@ def scrape_podcast_page(page=1):
 
 
 def scrape_podcast_pages(pages):
-    for p in range(1, pages):
+    for p in range(1, pages + 1):
         scrape_podcast_page(p)
