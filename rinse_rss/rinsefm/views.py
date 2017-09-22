@@ -16,5 +16,6 @@ def podcast_feed(request: HttpRequest):
             scheme=request._get_scheme(),
             hostname=request.get_host(),
             podcasts=PodcastEpisode.objects.all(),
-        )
+        ),
+        content_type='application/rss+xml',
     )
