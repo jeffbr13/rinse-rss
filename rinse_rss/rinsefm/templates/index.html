@@ -28,6 +28,13 @@
 			}
 		}
 	</style>
+    <!-- icons -->
+    <style>
+        main img {
+            height: 1.2em;
+            vertical-align: -12.5%;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -38,7 +45,15 @@
     <main>
         <p><a href="http://rinse.fm/">Rinse FM</a> don't provide a way to subscribe to their freely-downloadable show podcasts outside of Soundcloud (<a href="https://www.magneticmag.com/2017/07/rinse-fms-soundcloud-account-taken-down-reinstated-again/">hmmmm</a>) so here's an RSS feed for your favourite podcasts app:</p>
 
-        <a rel="alternate" type="application/rss+xml" href="{% url 'rss' %}">Subscribe to Rinse FM podcasts</a>
+        <ul>
+            <li>
+                <a rel="alternate" type="application/rss+xml" href="{% url 'rss' %}">Subscribe via RSS <img alt="RSS" src="{% static 'rss.svg' %}" /></a>
+            </li>
+            <li>
+                <a rel="alternate" type="application/rss+xml" href="pcast://{{ request.get_host }}{% url 'rss' %}">Subscribe via Apple Podcasts <img alt="Apple Podcasts" src="{% static 'podcast.svg' %}" /></a>
+            </li>
+        </ul>
+
 
         <p>Per-show feeds have been removed as Rinse FM no longer track them on their own website. 😭</p>
     </main>
