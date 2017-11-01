@@ -100,12 +100,6 @@ class AllPodcastsFeed(PodcastFeed):
     def items(self):
         return PodcastEpisode.objects.all()
 
-    def item_link(self, item):
-        return 'http://podcast.dgen.net/rinsefm/podcast/%s' % item.slug
-
-    def item_guid(self, item):
-        return item.audio_url
-
     def item_title(self, item):
         return item.title
 

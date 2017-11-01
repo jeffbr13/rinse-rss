@@ -14,3 +14,6 @@ class PodcastEpisode(models.Model):
 
     def __str__(self):
         return '%s (%s)' % (self.title, self.broadcast_date)
+
+    def get_absolute_url(self):
+        return self.audio_url
