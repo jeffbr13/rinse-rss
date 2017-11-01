@@ -8,7 +8,7 @@ from .models import PodcastEpisode
 
 
 def index(request: HttpRequest):
-    return render(request, 'index.html')
+    return render(request, 'index.html', context={'episodes': PodcastEpisode.objects.all()[:10]})
 
 
 class ItunesPodcastRssFeed(Rss201rev2Feed):

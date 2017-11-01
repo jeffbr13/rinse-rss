@@ -1,3 +1,4 @@
+{% load humanize %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -61,6 +62,15 @@
 
         <p>Per-show feeds have been removed as Rinse FM no longer track them on their own website. 😭</p>
     </main>
+
+    <section>
+        <h2>Latest Podcast Episodes</h2>
+        <ul>
+            {% for episode in episodes %}
+                <li><a href="{{ episode.get_absolute_url }}">{{ episode.title }} ({{ episode.broadcast_date|naturaltime }})</a></li>
+            {% endfor %}
+        </ul>
+    </section>
 
     <hr>
 
