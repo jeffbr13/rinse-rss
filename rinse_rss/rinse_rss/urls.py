@@ -16,9 +16,9 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
-from rinsefm.views import index, podcast_feed
+from rinsefm.views import index, AllPodcastsFeed
 
 urlpatterns = [
     url(r'^$', index, name='index'),
-    url(r'^rss/$', podcast_feed, name='rss'),
+    url(r'^rss/$', AllPodcastsFeed(), name='rss'),
 ]
