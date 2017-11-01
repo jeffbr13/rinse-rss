@@ -109,6 +109,9 @@ class AllPodcastsFeed(PodcastFeed):
     def item_title(self, item):
         return item.title
 
+    def item_description(self, item):
+        return ''
+
     def item_enclosure_url(self, item):
         return item.audio_url
 
