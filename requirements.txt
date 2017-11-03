@@ -1,6 +1,7 @@
 Django~=1.11.5
 django-environ~=0.4.4
 django-extensions~=1.9.1
+django-podcast-feed~=0.0.1
 huey~=1.4.1
 lxml~=4.0.0
 psycopg2~=2.7.3
